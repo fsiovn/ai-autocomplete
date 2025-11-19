@@ -1,13 +1,46 @@
 {
+  "publisher": "fsiovn",
+  "author": {
+    "name": "fsiovn",
+    "email": "fsiovn@gmail.com"
+  },
+  "icon": "/icon.png",
+  "homepage": "https://github.com/fsiovn/ai-autocomplete",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fsiovn/ai-autocomplete"
+  },
+  "extensionKind": [
+    "workspace",
+    "ui"
+  ],
+  "keywords": [
+    "ai",
+    "autocomplete",
+    "react",
+    "python",
+    "c++",
+    "java",
+    "c#",
+    "javascript",
+    "go",
+    "golang",
+    "php",
+    "typescript",
+    "c",
+    "ruby",
+    "kotlin"
+  ],
   "name": "ai-autocomplete",
-  "displayName": "AI Autocomplete",
+  "displayName": "AI-Autocomplete",
   "description": "The open source AI code autocomplete extension for Visual Studio Code",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.106.1"
   },
   "categories": [
-    "Other"
+    "AI",
+    "Programming Languages"
   ],
   "activationEvents": [
     "onStartupFinished"

@@ -1,65 +1,36 @@
-# ai-autocomplete README
+# fsiovn - AI Autocomplete
 
-This is the README for your extension "ai-autocomplete". After writing up a brief description, we recommend including the following sections.
+<p align="center">
+   <a href="https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/Visual_Studio_Code_Marketplace-v0.0.1-blue.png" alt="Visual Studio Code Marketplace" style="height: 24px"></a>
+    <a href="https://github.com/fsiovn/ai-autocomplete/blob/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-blue.png" alt="License Apache 2.0" style="height: 24px"></a>
+   <a href="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-green.png" alt="License Apache 2.0" style="height: 24px;"></a>
+</p>
 
-## Features
+**Require Gemini API key. Get one at https://aistudio.google.com/u/1/api-keys.**
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+# Overview
 
-For example if there is an image subfolder under your extension project workspace:
+`AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
-\!\[feature X\]\(images/feature-x.png\)
+<p align="center">
+   <a href="https://youtu.be/HebshQk4Zcw">
+      <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" width="100%" />
+   </a>
+</p>
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+`AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
 
-## Requirements
+```sh
+ai-autocomplete-0.0.1.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.09 KB]
+   ├─ extension.js [11.07 KB]
+   ├─ icon.png [33.58 KB]
+   ├─ package.json [1.4 KB]
+   ├─ readme.md [1.7 KB]
+   └─ vsce-publish-patch.sh [0.24 KB]
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+ DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.1.vsix (8 files, 38.95 KB)
+```
