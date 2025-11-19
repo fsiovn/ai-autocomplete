@@ -8,4 +8,4 @@ npm run lint
 
 npm install -g @vscode/vsce
 
-vsce package
+vsce package --pre-release

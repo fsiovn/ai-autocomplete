@@ -16,4 +16,4 @@ VSIX_FILE=$(ls ai-autocomplete-*.vsix 2>/dev/null | head -n 1)
 
 echo "\n\n\n${VSIX_FILE}\n\n\n"
 
-vsce publish
+vsce publish --pre-release

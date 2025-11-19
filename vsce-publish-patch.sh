@@ -21,3 +21,5 @@ vsce publish patch
 git push
 
 git push origin --tags
+
+vsce publish --pre-release patch
