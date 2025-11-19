@@ -10,6 +10,8 @@ const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 
 const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input Gemini API Key';
 
+const FIM_INSTRUCTION = 'You are a code completion assistant\nYour name is fsiovn - AI Autocomplete\nFIM mode(Fill-In-the-Middle)\nOutput format <fim_middle></fim_middle>\nEg: <fim_middle>console.log</fim_middle>\nEg: <fim_middle>System.out.print</fim_middle>\nEg: <fim_middle>int x = 1;\nint y = 1;\nSystem.out.print("x + y = ", x + y);</fim_middle>\nAlways suggest code snippets longer than 9 characters';
+
 // This method is called when your extension is activated
 /**
  * @param {vscode.ExtensionContext} context
@@ -27,6 +29,17 @@ async function activate(context) {
 		} catch (error) {
 			console.error('[fsiovn] AI Autocomplete', error);
 			log(error);
+		}
+
+		try {
+
+			await registerInlineCompletionItemProvider(context);
+
+		} catch (error) {
+
+			console.error('[fsiovn] AI Autocomplete', error);
+			log(error);
+
 		}
 
 	} catch (error) {
@@ -72,6 +85,267 @@ async function registerInputGeminiAPIKeyCommand(context) {
 		});
 
 		context.subscriptions.push(inputGeminiAPIKeyCommandDisposable);
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function registerInlineCompletionItemProvider(context) {
+
+	try {
+
+		const inlineCompletionItemDocumentSelector = { pattern: '**' };
+
+		const inlineCompletionItemProvider = {
+
+			provideInlineCompletionItems: async (document, position, provideInlineCompletionItemsContext, token) => {
+
+				try {
+
+					const filename = document.fileName;
+
+					const sensitivePatterns = [
+						'_history',
+						'.bak',
+						'.bash',
+						'.crt',
+						'.db',
+						'.dump',
+						'.env',
+						'.git',
+						'.gitignore',
+						'.hg',
+						'.htaccess',
+						'.htpasswd',
+						'.key',
+						'.log',
+						'.p12',
+						'.pem',
+						'.pfx',
+						'.pub',
+						'.sql',
+						'.sqlite',
+						'.svn',
+						'.swp',
+						'.zsh',
+						'api_key',
+						'appsettings',
+						'auth',
+						'authorized_keys',
+						'aws',
+						'azure',
+						'backup',
+						'bitbucket',
+						'config.',
+						'credential',
+						'credentials.json',
+						'docker-compose',
+						'dockerfile',
+						'gcloud',
+						'google-services',
+						'id_dsa',
+						'id_ed25519',
+						'id_rsa',
+						'keystore',
+						'known_hosts',
+						'oauth',
+						'password',
+						'php.ini',
+						'secret',
+						'secrets.json',
+						'service-account',
+						'settings.py',
+						'token',
+						'web.config',
+						'wp-config'
+					];
+
+					if (sensitivePatterns.some(pattern => filename.toLowerCase().includes(pattern))) {
+
+						log(`Skip sensitive file ${filename}`);
+
+						return null;
+					}
+
+					// Cancel on change
+					if (token.isCancellationRequested) {
+						log('Cancel on change');
+						return null;
+					}
+
+					if (provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
+						return null;
+					}
+
+					// Debounce
+					await new Promise(resolve => setTimeout(resolve, 1000));
+
+					// Cancel on change
+					if (token.isCancellationRequested) {
+						log('Cancel on change after delay');
+						return null;
+					}
+
+					// Using getText for multi lines
+					// Using substring for single line for better performance
+
+					const currentLine = document.lineAt(position.line);
+					const linePrefix = currentLine.text.substring(0, position.character);
+
+					// Allow tab
+					if (linePrefix?.trim()?.length === 0) {
+						// Debounce
+						await new Promise(resolve => setTimeout(resolve, 3000));
+
+						// Cancel on change
+						if (token.isCancellationRequested) {
+							log('Cancel on change after delay for tab');
+							return null;
+						}
+					}
+
+					const lineSuffix = currentLine.text.substring(position.character);
+
+					const startPosition = new vscode.Position(0, 0);
+					const prefix = document.getText(new vscode.Range(startPosition, position));
+
+					const lastLine = document.lineCount - 1;
+					const endPosition = document.lineAt(lastLine).range.end;
+					const suffix = document.getText(new vscode.Range(position, endPosition));
+
+					const insertText = await fillInMiddle(context, filename, prefix, suffix);
+
+					if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+						log(`Skip short suggestion ${insertText}`);
+						return null;
+					}
+
+					const inlineCompletionItem = new vscode.InlineCompletionItem(
+						insertText,
+						new vscode.Range(position, position)
+					);
+
+					return [inlineCompletionItem];
+
+				} catch (error) {
+
+					console.error('[fsiovn] AI Autocomplete', error);
+					log(error);
+
+				}
+
+			}
+
+		}
+
+		const inlineCompletionProviderDisposable = vscode.languages.registerInlineCompletionItemProvider(
+			inlineCompletionItemDocumentSelector,
+			inlineCompletionItemProvider
+		);
+
+		context.subscriptions.push(inlineCompletionProviderDisposable);
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function fillInMiddle(context, filename, prefix, suffix) {
+
+	try {
+
+		return await geminiFillInMiddle(context, filename, prefix, suffix);
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro']) {
+
+	try {
+
+		await promptInputGeminiAPIKey(context);
+
+		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
+
+		if (!geminiAPIKey) {
+			return null;
+		}
+
+		const model = models.shift();
+
+		const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
+
+		const body = {
+			model: model,
+			messages: [
+				{
+					role: 'system',
+					content: FIM_INSTRUCTION
+				},
+				{
+					role: 'user',
+					content: `${FIM_INSTRUCTION}\n<filename>${filename}</filename>\n<fim_prefix>${prefix}</fim_prefix>\n<fim_suffix>${suffix}</fim_suffix>`,
+				},
+			],
+		};
+
+		const response = await fetch(baseURL, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${geminiAPIKey}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok && models?.length <= 1) {
+			vscode.window.showErrorMessage(`API call failed with status ${response.status}`);
+
+			console.warn('[fsiovn] AI Autocomplete - API call failed', { model: models, response: response });
+
+			log({ model: model, response: response });
+
+			return null;
+		}
+
+		const data = await response.json();
+		const content = data?.choices?.[0]?.message?.content;
+
+		const insertText = content?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
+
+		if (!insertText && models?.length > 1) {
+			return geminiFillInMiddle(context, filename, prefix, suffix, models);
+		}
+
+		log({
+			model: model,
+			filename: filename,
+			prefix: prefix,
+			suffix: suffix,
+			insertText: insertText
+		})
+
+		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+			log(`Skip short suggestion ${insertText}`);
+			return null;
+		}
+
+		return insertText;
 
 	} catch (error) {
 
