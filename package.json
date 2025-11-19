@@ -9,13 +9,18 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "ai-autocomplete.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "ai-autocomplete.inputGeminiAPIKey",
+        "title": "Input Gemini API key",
+        "category": "fsiovn - AI Autocomplete"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",

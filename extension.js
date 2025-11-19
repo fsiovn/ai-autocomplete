@@ -1,34 +1,190 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const OUTPUT_CHANNEL = vscode.window.createOutputChannel('AI Autocomplete');
 
+const GET_GEMINI_API_KEY_BUTTON_LABEL = 'Get Gemini API key';
+const GET_GEMINI_API_KEY_URL = 'https://aistudio.google.com/u/1/api-keys';
+
+const GEMINI_API_SECRET_KEY_NAME = 'FSIOVN_GEMINI_API_KEY';
+const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
+
+const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input Gemini API Key';
+
+// This method is called when your extension is activated
 /**
  * @param {vscode.ExtensionContext} context
  */
-function activate(context) {
+async function activate(context) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "ai-autocomplete" is now active!');
+	try {
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('ai-autocomplete.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+		console.log('[fsiovn] AI Autocomplete', 'The open source AI code autocomplete extension for Visual Studio Code');
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from AI Autocomplete!');
-	});
+		try {
+			registerInputGeminiAPIKeyCommand(context);
+			getGeminiAPIKey(context);
+			promptInputGeminiAPIKey(context);
+		} catch (error) {
+			console.error('[fsiovn] AI Autocomplete', error);
+			log(error);
+		}
 
-	context.subscriptions.push(disposable);
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function registerInputGeminiAPIKeyCommand(context) {
+
+	try {
+
+		const inputGeminiAPIKeyCommandDisposable = vscode.commands.registerCommand(INPUT_GEMINI_API_KEY_COMMAND, async function () {
+
+			const geminiAPIKey = await vscode.window.showInputBox({
+				title: 'Input Gemini API key',
+				prompt: 'Your Gemini API key. Get one at https://aistudio.google.com/u/1/api-keys.',
+				placeHolder: `Paste your Gemini API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key' : ''}`,
+				password: true, // Mark input characters for security
+				ignoreFocusOut: true, // Keep the input box open when clicking outside
+				validateInput: (text) => {
+					return text && text?.trim()?.length > 0 ? null : 'Gemini API key cannot be empty.';
+				}
+			});
+
+			if (geminiAPIKey) {
+				if (geminiAPIKey.toUpperCase() === 'DELETE') {
+					await context.secrets.delete(GEMINI_API_SECRET_KEY_NAME);
+					vscode.window.showInformationMessage('Gemini API key deleted.');
+				} else {
+					await context.secrets.store(GEMINI_API_SECRET_KEY_NAME, geminiAPIKey);
+					vscode.window.showInformationMessage('Gemini API key saved.');
+				}
+			} else {
+				vscode.window.showErrorMessage('Gemini API key input cancelled.');
+			}
+
+			promptInputGeminiAPIKey(context);
+
+		});
+
+		context.subscriptions.push(inputGeminiAPIKeyCommandDisposable);
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+// Require async/await
+async function getGeminiAPIKey(context) {
+
+	try {
+
+		// Waiting for user to click button
+		const result = await vscode.window.showInformationMessage(
+			'[fsiovn] AI Autocomplete - The open source AI code autocomplete extension for Visual Studio Code',
+			GET_GEMINI_API_KEY_BUTTON_LABEL,
+			INPUT_GEMINI_API_KEY_BUTTON_LABEL
+		);
+
+		// User clicked button
+
+		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL) {
+			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
+		}
+		if (result === GET_GEMINI_API_KEY_BUTTON_LABEL) {
+			vscode.env.openExternal(vscode.Uri.parse(GET_GEMINI_API_KEY_URL));
+			promptInputGeminiAPIKey(context);
+		}
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function promptInputGeminiAPIKey(context) {
+
+	try {
+
+		// Attempt to get key, otherwise prompt user to input key
+		await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) || await inputGeminiAPIKey(context);
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+// Require async/await
+async function inputGeminiAPIKey(context) {
+
+	try {
+
+		// Waiting for user to click button
+		const result = await vscode.window.showErrorMessage(
+			'Gemini API key not found. Configure it before using the extension.',
+			INPUT_GEMINI_API_KEY_BUTTON_LABEL,
+			GET_GEMINI_API_KEY_BUTTON_LABEL
+		);
+
+		// User clicked button
+
+		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL) {
+			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
+		}
+		if (result === GET_GEMINI_API_KEY_BUTTON_LABEL) {
+			vscode.env.openExternal(vscode.Uri.parse(GET_GEMINI_API_KEY_URL));
+		}
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+async function log(...messages) {
+
+	try {
+
+		OUTPUT_CHANNEL.appendLine('\n');
+
+		for (const message of messages) {
+			try {
+				OUTPUT_CHANNEL.appendLine(`[fsiovn] AI Autocomplete ${JSON.stringify(message, null, 4)}`);
+			} catch (error) {
+				console.error('[fsiovn] AI Autocomplete', error);
+			}
+		}
+
+		OUTPUT_CHANNEL.appendLine('\n');
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+
+	}
+
 }
 
 // This method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
 	activate,
