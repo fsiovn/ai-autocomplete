@@ -32,11 +32,11 @@ ai-autocomplete-0.0.1.vsix
 ├─ extension.vsixmanifest 
 └─ extension/
    ├─ LICENSE.txt [11.09 KB]
-   ├─ extension.js [11.07 KB]
+   ├─ extension.js [11.28 KB]
    ├─ icon.png [33.58 KB]
    ├─ package.json [1.47 KB]
-   ├─ readme.md [1.7 KB]
+   ├─ readme.md [1.99 KB]
    └─ vsce-publish-patch.sh [0.24 KB]
 
- DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.1.vsix (8 files, 38.98 KB)
+ DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.1.vsix (8 files, 39.17 KB)
 ```
