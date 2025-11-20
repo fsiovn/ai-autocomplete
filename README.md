@@ -19,7 +19,7 @@ Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Stud
 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
 <p align="center">
-   <a href="https://youtu.be/HebshQk4Zcw">
+   <a href="https://youtu.be/BStExJBhNEg">
       <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" width="100%" />
    </a>
 </p>
