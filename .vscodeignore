@@ -13,6 +13,7 @@ vsc-extension-quickstart.md
 vsce-install.sh
 vsce-package.sh
 vsce-publish.sh
+vsce-publish-patch.sh
 .devcontainer/**
 test/**
 logo.svg
