@@ -9,6 +9,7 @@ const GEMINI_API_SECRET_KEY_NAME = 'FSIOVN_GEMINI_API_KEY';
 const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 
 const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input Gemini API Key';
+const CHANGE_GEMINI_API_KEY_BUTTON_LABEL = 'Change Gemini API Key';
 
 const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'Your name is fsiovn - AI Autocomplete\n'
@@ -68,9 +69,9 @@ async function registerInputGeminiAPIKeyCommand(context) {
 		const inputGeminiAPIKeyCommandDisposable = vscode.commands.registerCommand(INPUT_GEMINI_API_KEY_COMMAND, async function () {
 
 			const geminiAPIKey = await vscode.window.showInputBox({
-				title: 'Input Gemini API key',
-				prompt: 'Your Gemini API key. Get one at https://aistudio.google.com/u/1/api-keys.',
-				placeHolder: `Paste your Gemini API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key' : ''}`,
+				title: 'Input Gemini/Cerebras API key',
+				prompt: 'Enter your Gemini/Cerebras API key. Get one at https://aistudio.google.com/u/1/api-keys',
+				placeHolder: `Paste your Gemini/Cerebras API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key' : ''}`,
 				password: true, // Mark input characters for security
 				ignoreFocusOut: true, // Keep the input box open when clicking outside
 				validateInput: (text) => {
@@ -83,7 +84,7 @@ async function registerInputGeminiAPIKeyCommand(context) {
 					await context.secrets.delete(GEMINI_API_SECRET_KEY_NAME);
 					vscode.window.showInformationMessage('Gemini API key deleted.');
 				} else {
-					await context.secrets.store(GEMINI_API_SECRET_KEY_NAME, geminiAPIKey);
+					await context.secrets.store(GEMINI_API_SECRET_KEY_NAME, geminiAPIKey?.trim());
 					vscode.window.showInformationMessage('Gemini API key saved.');
 				}
 			} else {
@@ -192,8 +193,10 @@ async function registerInlineCompletionItemProvider(context) {
 						return null;
 					}
 
+					const delayRatio = String(await context.secrets.get(GEMINI_API_SECRET_KEY_NAME))?.startsWith("csk-") ? 1 : 2
+
 					// Debounce
-					await new Promise(resolve => setTimeout(resolve, 1000));
+					await new Promise(resolve => setTimeout(resolve, 500 * delayRatio));
 
 					// Cancel on change
 					if (token.isCancellationRequested) {
@@ -210,7 +213,7 @@ async function registerInlineCompletionItemProvider(context) {
 					// Allow tab
 					if (linePrefix?.trim()?.length === 0) {
 						// Debounce
-						await new Promise(resolve => setTimeout(resolve, 3000));
+						await new Promise(resolve => setTimeout(resolve, 1000 * delayRatio));
 
 						// Cancel on change
 						if (token.isCancellationRequested) {
@@ -273,7 +276,19 @@ async function fillInMiddle(context, filename, prefix, suffix) {
 
 	try {
 
-		return await geminiFillInMiddle(context, filename, prefix, suffix);
+		await promptInputGeminiAPIKey(context);
+
+		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
+
+		if (!geminiAPIKey) {
+			return null;
+		}
+
+		if (String(geminiAPIKey)?.startsWith("csk-")) {
+			return await cerebrasFillInMiddle(context, filename, prefix, suffix, geminiAPIKey)
+		}
+
+		return await geminiFillInMiddle(context, filename, prefix, suffix, geminiAPIKey);
 
 	} catch (error) {
 
@@ -284,21 +299,29 @@ async function fillInMiddle(context, filename, prefix, suffix) {
 
 }
 
-async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro']) {
+async function geminiFillInMiddle(context, filename, prefix, suffix, apiKey) {
+
+	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
+
+	return String(apiKey)?.startsWith("AIza") ? await opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) : null;
+
+}
+
+async function cerebrasFillInMiddle(context, filename, prefix, suffix, apiKey) {
+
+	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
+	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
+
+	return String(apiKey)?.startsWith("csk-") ? await opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) : null;
+
+}
+
+async function opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) {
 
 	try {
 
-		await promptInputGeminiAPIKey(context);
-
-		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
-
-		if (!geminiAPIKey) {
-			return null;
-		}
-
 		const model = models.shift();
-
-		const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
 
 		const body = {
 			model: model,
@@ -318,7 +341,7 @@ async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['
 		const response = await fetch(baseURL, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${geminiAPIKey}`,
+				'Authorization': `Bearer ${apiKey}`,
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(body),
@@ -340,7 +363,7 @@ async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
 		if (!insertText && models?.length > 1) {
-			return geminiFillInMiddle(context, filename, prefix, suffix, models);
+			return opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models);
 		}
 
 		log({
@@ -376,12 +399,12 @@ async function getGeminiAPIKey(context) {
 		const result = await vscode.window.showInformationMessage(
 			'[fsiovn] AI Autocomplete - The open source AI code autocomplete extension for Visual Studio Code',
 			GET_GEMINI_API_KEY_BUTTON_LABEL,
-			INPUT_GEMINI_API_KEY_BUTTON_LABEL
+			await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? CHANGE_GEMINI_API_KEY_BUTTON_LABEL : INPUT_GEMINI_API_KEY_BUTTON_LABEL
 		);
 
 		// User clicked button
 
-		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL) {
+		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL || result === CHANGE_GEMINI_API_KEY_BUTTON_LABEL) {
 			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
 		}
 		if (result === GET_GEMINI_API_KEY_BUTTON_LABEL) {

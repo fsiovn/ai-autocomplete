@@ -6,7 +6,13 @@
    <a href="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-green.png" alt="License Apache 2.0" style="height: 24px;"></a>
 </p>
 
-**Require Gemini API key. Get one at https://aistudio.google.com/u/1/api-keys.**
+**Require Gemini/Cerebras API key:**
+   
+   - *Get Gemini API key at https://aistudio.google.com/u/1/api-keys*
+   
+   - *Get Cerebras API key at https://cloud.cerebras.ai*
+
+---
 
 Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)
 
