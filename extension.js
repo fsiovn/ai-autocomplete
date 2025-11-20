@@ -10,7 +10,17 @@ const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 
 const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input Gemini API Key';
 
-const FIM_INSTRUCTION = 'You are a code completion assistant\nYour name is fsiovn - AI Autocomplete\nFIM mode(Fill-In-the-Middle)\nOutput format <fim_middle></fim_middle>\nEg: <fim_middle>console.log</fim_middle>\nEg: <fim_middle>System.out.print</fim_middle>\nEg: <fim_middle>int x = 1;\nint y = 1;\nSystem.out.print("x + y = ", x + y);</fim_middle>\nAlways suggest code snippets longer than 9 characters';
+const FIM_INSTRUCTION = 'You are a code completion assistant\n'
+	+ 'Your name is fsiovn - AI Autocomplete\n'
+	+ 'FIM mode(Fill-In-the-Middle)\n'
+	+ 'Output format <fim_middle></fim_middle>\n'
+	+ 'Eg: <fim_middle>console.log</fim_middle>\n'
+	+ 'Eg: <fim_middle>System.out.print</fim_middle>\n'
+	+ 'Eg: <fim_middle>int x = 1;\nint y = 1;\\nSystem.out.print("x + y = ", x + y);</fim_middle>\n'
+	+ 'Always suggest code snippets longer than 9 characters\n'
+	+ 'Return empty if no valid suggestion <fim_middle></fim_middle>\n'
+	+ 'Syntax must be valid\n'
+	+ 'No explanations, only code completions\n';
 
 // This method is called when your extension is activated
 /**
@@ -302,6 +312,7 @@ async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['
 					content: `${FIM_INSTRUCTION}\n<filename>${filename}</filename>\n<fim_prefix>${prefix}</fim_prefix>\n<fim_suffix>${suffix}</fim_suffix>`,
 				},
 			],
+			temperature: 0.5,
 		};
 
 		const response = await fetch(baseURL, {
@@ -326,7 +337,7 @@ async function geminiFillInMiddle(context, filename, prefix, suffix, models = ['
 		const data = await response.json();
 		const content = data?.choices?.[0]?.message?.content;
 
-		const insertText = content?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
+		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
 		if (!insertText && models?.length > 1) {
 			return geminiFillInMiddle(context, filename, prefix, suffix, models);
