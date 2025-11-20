@@ -8,9 +8,9 @@
 
 **Require Gemini/Cerebras API key:**
    
-   - *Get Gemini API key at https://aistudio.google.com/u/1/api-keys*
+   - *Get free Gemini API key at https://aistudio.google.com/u/1/api-keys*
    
-   - *Get Cerebras API key at https://cloud.cerebras.ai* (recommended)
+   - *Get free Cerebras API key at https://cloud.cerebras.ai (recommended)*
 
 ---
 
@@ -25,23 +25,27 @@ Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Stud
 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
 <p align="center">
-   <a href="https://youtu.be/BStExJBhNEg">
-      <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" width="100%" />
-   </a>
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" width="100%" />
 </p>
 
 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
 
 ```sh
-ai-autocomplete-0.0.2.vsix
+ai-autocomplete-0.0.3.vsix
 ├─ [Content_Types].xml 
 ├─ extension.vsixmanifest 
 └─ extension/
    ├─ LICENSE.txt [11.09 KB]
-   ├─ extension.js [12.52 KB]
+   ├─ extension.js [15.81 KB]
    ├─ icon.png [33.58 KB]
    ├─ package.json [1.47 KB]
-   └─ readme.md [2.04 KB]
+   └─ readme.md [2.16 KB]
 
- DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.2.vsix (7 files, 39.13 KB)
+ DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.3.vsix (7 files, 39.43 KB)
 ```
+
+---
+
+<p align="center">
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" width="100%" />
+</p>
