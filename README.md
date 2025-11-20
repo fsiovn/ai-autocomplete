@@ -8,6 +8,12 @@
 
 **Require Gemini API key. Get one at https://aistudio.google.com/u/1/api-keys.**
 
+Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)
+
+   - Click `Extensions` or `Ctrl` + `Shift` + `X`
+   - Search `AI-Autocomplete`
+   - Click `Install`
+
 # Overview
 
 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
@@ -28,9 +34,9 @@ ai-autocomplete-0.0.1.vsix
    ├─ LICENSE.txt [11.09 KB]
    ├─ extension.js [11.07 KB]
    ├─ icon.png [33.58 KB]
-   ├─ package.json [1.4 KB]
+   ├─ package.json [1.47 KB]
    ├─ readme.md [1.7 KB]
    └─ vsce-publish-patch.sh [0.24 KB]
 
- DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.1.vsix (8 files, 38.95 KB)
+ DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.1.vsix (8 files, 38.98 KB)
 ```

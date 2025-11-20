@@ -28,3 +28,6 @@ License-Apache_2.0-green.png
 License-Apache_2.0-green.svg
 Visual_Studio_Code_Marketplace-v0.0.1-blue.png
 Visual_Studio_Code_Marketplace-v0.0.1-blue.svg
+.vscode-test-web/**
+vsc-test-web.bat
+vsc-test-web.sh

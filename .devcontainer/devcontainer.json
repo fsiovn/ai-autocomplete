@@ -1,3 +1,6 @@
 {
-    "image": "node:latest"
+    "image": "node:latest",
+    "forwardPorts": [
+        3000
+    ]
 }
