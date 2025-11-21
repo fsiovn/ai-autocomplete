@@ -71,24 +71,24 @@ async function registerInputGeminiAPIKeyCommand(context) {
 			const geminiAPIKey = await vscode.window.showInputBox({
 				title: 'Input Gemini/Cerebras API key',
 				prompt: 'Enter your Gemini/Cerebras API key. Get one at https://aistudio.google.com/u/1/api-keys',
-				placeHolder: `Paste your Gemini/Cerebras API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key' : ''}`,
+				placeHolder: `Paste your Gemini/Cerebras API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key.' : ''}`,
 				password: true, // Mark input characters for security
 				ignoreFocusOut: true, // Keep the input box open when clicking outside
 				validateInput: (text) => {
-					return text && text?.trim()?.length > 0 ? null : 'Gemini API key cannot be empty.';
+					return text && text?.trim()?.length > 0 ? null : 'Gemini/Cerebras API key cannot be empty.';
 				}
 			});
 
 			if (geminiAPIKey) {
 				if (geminiAPIKey.toUpperCase() === 'DELETE') {
 					await context.secrets.delete(GEMINI_API_SECRET_KEY_NAME);
-					vscode.window.showInformationMessage('Gemini API key deleted.');
+					vscode.window.showInformationMessage(`${geminiAPIKey?.startsWith('csk-') ? 'Cerebras' : 'Gemini'} API key deleted.`);
 				} else {
 					await context.secrets.store(GEMINI_API_SECRET_KEY_NAME, geminiAPIKey?.trim());
-					vscode.window.showInformationMessage('Gemini API key saved.');
+					vscode.window.showInformationMessage(`${geminiAPIKey?.startsWith('csk-') ? 'Cerebras' : 'Gemini'} API key saved.`);
 				}
 			} else {
-				vscode.window.showErrorMessage('Gemini API key input cancelled.');
+				vscode.window.showErrorMessage('Gemini/Cerebras API key input cancelled.');
 			}
 
 			promptInputGeminiAPIKey(context);
@@ -117,6 +117,20 @@ async function registerInlineCompletionItemProvider(context) {
 			provideInlineCompletionItems: async (document, position, provideInlineCompletionItemsContext, token) => {
 
 				try {
+
+					// Using getText for multi lines
+					// Using substring for single line for better performance
+
+					const currentLine = document.lineAt(position.line);
+					const linePrefix = currentLine.text.substring(0, position.character);
+
+					if (linePrefix === '}') {
+						return null;
+					}
+
+					if (String(linePrefix)?.startsWith('</') && String(linePrefix)?.endsWith('>')) {
+						return null;
+					}
 
 					const filename = document.fileName;
 
@@ -189,11 +203,13 @@ async function registerInlineCompletionItemProvider(context) {
 						return null;
 					}
 
-					if (provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
+					const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
+
+					if (!String(geminiAPIKey)?.startsWith('csk-') && provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
 						return null;
 					}
 
-					const delayRatio = String(await context.secrets.get(GEMINI_API_SECRET_KEY_NAME))?.startsWith("csk-") ? 1 : 2
+					const delayRatio = String(geminiAPIKey)?.startsWith('csk-') ? 1 : 2
 
 					// Debounce
 					await new Promise(resolve => setTimeout(resolve, 500 * delayRatio));
@@ -203,12 +219,6 @@ async function registerInlineCompletionItemProvider(context) {
 						log('Cancel on change after delay');
 						return null;
 					}
-
-					// Using getText for multi lines
-					// Using substring for single line for better performance
-
-					const currentLine = document.lineAt(position.line);
-					const linePrefix = currentLine.text.substring(0, position.character);
 
 					// Allow tab
 					if (linePrefix?.trim()?.length === 0) {
@@ -231,19 +241,95 @@ async function registerInlineCompletionItemProvider(context) {
 					const endPosition = document.lineAt(lastLine).range.end;
 					const suffix = document.getText(new vscode.Range(position, endPosition));
 
-					const insertText = await fillInMiddle(context, filename, prefix, suffix);
+					const insertText = await fillInMiddle(context, token, filename, document?.languageId, prefix, suffix);
 
 					if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
 						log(`Skip short suggestion ${insertText}`);
 						return null;
 					}
 
-					const inlineCompletionItem = new vscode.InlineCompletionItem(
-						insertText,
-						new vscode.Range(position, position)
+					const inlineCompletionItems = [];
+
+					inlineCompletionItems.push(
+						new vscode.InlineCompletionItem(
+							insertText,
+							new vscode.Range(position, position)
+						)
 					);
 
-					return [inlineCompletionItem];
+					if (String(linePrefix)?.endsWith('.')) {
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								String(insertText)?.replace(/^[\s.]+/, ''),
+								new vscode.Range(position, position)
+							)
+						);
+					} else if (String(linePrefix)?.endsWith(' ')) {
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								String(insertText)?.replace(/^[\s.]+/, ''),
+								new vscode.Range(position, position)
+							)
+						);
+					} else if (String(linePrefix)?.endsWith(';')) {
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+					} else {
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								` ${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+						inlineCompletionItems.push(
+							new vscode.InlineCompletionItem(
+								`\n\n\n\n${insertText}`,
+								new vscode.Range(position, position)
+							)
+						);
+					}
+
+					return inlineCompletionItems;
 
 				} catch (error) {
 
@@ -272,11 +358,26 @@ async function registerInlineCompletionItemProvider(context) {
 
 }
 
-async function fillInMiddle(context, filename, prefix, suffix) {
+async function fillInMiddle(context, token, filename, programmingLanguage, prefix, suffix) {
 
 	try {
 
 		await promptInputGeminiAPIKey(context);
+
+		try {
+
+			// Cancel on change
+			if (token.isCancellationRequested) {
+				log('Cancel on change - FIM');
+				return null;
+			}
+
+		} catch (error) {
+
+			console.error('[fsiovn] AI Autocomplete', error);
+			log(error);
+
+		}
 
 		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
@@ -284,11 +385,11 @@ async function fillInMiddle(context, filename, prefix, suffix) {
 			return null;
 		}
 
-		if (String(geminiAPIKey)?.startsWith("csk-")) {
-			return await cerebrasFillInMiddle(context, filename, prefix, suffix, geminiAPIKey)
+		if (String(geminiAPIKey)?.startsWith('csk-')) {
+			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey)
 		}
 
-		return await geminiFillInMiddle(context, filename, prefix, suffix, geminiAPIKey);
+		return await geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
 
 	} catch (error) {
 
@@ -299,25 +400,40 @@ async function fillInMiddle(context, filename, prefix, suffix) {
 
 }
 
-async function geminiFillInMiddle(context, filename, prefix, suffix, apiKey) {
+async function geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
 
-	return String(apiKey)?.startsWith("AIza") ? await opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey)?.startsWith('AIza') ? await opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
-async function cerebrasFillInMiddle(context, filename, prefix, suffix, apiKey) {
+async function cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
 	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
 
-	return String(apiKey)?.startsWith("csk-") ? await opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey)?.startsWith('csk-') ? await opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
-async function opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models) {
+async function opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) {
+
+	try {
+
+		// Cancel on change
+		if (token.isCancellationRequested) {
+			log('Cancel on change - OAI FIM');
+			return null;
+		}
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
 
 	try {
 
@@ -332,7 +448,7 @@ async function opneAICompatibleFillInMiddle(context, filename, prefix, suffix, b
 				},
 				{
 					role: 'user',
-					content: `${FIM_INSTRUCTION}\n<filename>${filename}</filename>\n<fim_prefix>${prefix}</fim_prefix>\n<fim_suffix>${suffix}</fim_suffix>`,
+					content: `${FIM_INSTRUCTION}\n<filename>${filename}</filename>\n<programming_language>${programmingLanguage}</programming_language>\n<fim_prefix>${prefix}</fim_prefix>\n<fim_suffix>${suffix}</fim_suffix>`,
 				},
 			],
 			temperature: 0.5,
@@ -363,12 +479,13 @@ async function opneAICompatibleFillInMiddle(context, filename, prefix, suffix, b
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
 		if (!insertText && models?.length > 1) {
-			return opneAICompatibleFillInMiddle(context, filename, prefix, suffix, baseURL, apiKey, models);
+			return opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
 		}
 
 		log({
 			model: model,
 			filename: filename,
+			programmingLanguage: programmingLanguage,
 			prefix: prefix,
 			suffix: suffix,
 			insertText: insertText
@@ -471,21 +588,21 @@ async function log(...messages) {
 
 	try {
 
-		OUTPUT_CHANNEL.appendLine('\n');
+		OUTPUT_CHANNEL.appendLine('\n---\n');
 
 		for (const message of messages) {
 			try {
-				OUTPUT_CHANNEL.appendLine(`[fsiovn] AI Autocomplete ${JSON.stringify(message, null, 4)}`);
+				OUTPUT_CHANNEL.appendLine(`[fsiovn] AI Autocomplete\n${message}\n${JSON.stringify(message, null, 4)}`);
 			} catch (error) {
-				console.error('[fsiovn] AI Autocomplete', error);
+				console.error('[fsiovn] AI Autocomplete', message, error);
 			}
 		}
 
-		OUTPUT_CHANNEL.appendLine('\n');
+		OUTPUT_CHANNEL.appendLine('\n---\n');
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
+		console.error('[fsiovn] AI Autocomplete', messages, error);
 
 	}
 
