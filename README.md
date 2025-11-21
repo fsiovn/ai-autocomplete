@@ -12,6 +12,16 @@
 
    - *Get free Gemini API key at https://aistudio.google.com/u/1/api-keys*
 
+**Policies**
+
+   - [Cerebras Polices](https://www.cerebras.ai/policies)
+
+   - [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms)
+
+   - [Cloudflare Terms of Use](https://www.cloudflare.com/website-terms/)
+
+   - **fsiovn FIM endpoint** is only allowed to be used for [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension. Any other use is not permitted.
+
 ---
 
 Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)

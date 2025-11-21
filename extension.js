@@ -26,6 +26,8 @@ const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'Syntax must be valid\n'
 	+ 'No explanations, only code completions\n';
 
+let fimCounter = 0;
+
 // This method is called when your extension is activated
 /**
  * @param {vscode.ExtensionContext} context
@@ -365,31 +367,35 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 
 	try {
 
-		await promptInputGeminiAPIKey(context);
+		fimCounter++;
 
-		try {
+		if (fimCounter % 999 === 0) {
+			await promptInputGeminiAPIKey(context);
 
-			// Cancel on change
-			if (token.isCancellationRequested) {
-				log('Cancel on change - FIM');
-				return null;
+			try {
+
+				// Cancel on change
+				if (token.isCancellationRequested) {
+					log('Cancel on change - FIM');
+					return null;
+				}
+
+			} catch (error) {
+
+				console.error('[fsiovn] AI Autocomplete', error);
+				log(error);
+
 			}
-
-		} catch (error) {
-
-			console.error('[fsiovn] AI Autocomplete', error);
-			log(error);
-
 		}
 
 		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
 		if (!geminiAPIKey) {
-			return null;
+			return await fsiovnFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix);
 		}
 
 		if (String(geminiAPIKey)?.startsWith('csk-')) {
-			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey)
+			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
 		}
 
 		return await geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
@@ -408,7 +414,7 @@ async function geminiFillInMiddle(context, token, filename, programmingLanguage,
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
 
-	return String(apiKey)?.startsWith('AIza') ? await opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey)?.startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
@@ -417,11 +423,11 @@ async function cerebrasFillInMiddle(context, token, filename, programmingLanguag
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
 	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
 
-	return String(apiKey)?.startsWith('csk-') ? await opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey)?.startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
-async function opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) {
+async function openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) {
 
 	try {
 
@@ -440,7 +446,7 @@ async function opneAICompatibleFillInMiddle(context, token, filename, programmin
 
 	try {
 
-		const model = models.shift();
+		const model = models?.shift();
 
 		const body = {
 			model: model,
@@ -471,7 +477,7 @@ async function opneAICompatibleFillInMiddle(context, token, filename, programmin
 
 			console.warn('[fsiovn] AI Autocomplete - API call failed', { model: models, response: response });
 
-			log({ model: model, response: response });
+			log('API call failed', { model: model, response: response });
 
 			return null;
 		}
@@ -482,7 +488,7 @@ async function opneAICompatibleFillInMiddle(context, token, filename, programmin
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
 		if (!insertText && models?.length > 1) {
-			return opneAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
+			return await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
 		}
 
 		log({
@@ -492,7 +498,68 @@ async function opneAICompatibleFillInMiddle(context, token, filename, programmin
 			prefix: prefix,
 			suffix: suffix,
 			insertText: insertText
-		})
+		});
+
+		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+			log(`Skip short suggestion ${insertText}`);
+			return null;
+		}
+
+		return insertText;
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+}
+
+// **fsiovn FIM endpoint** is only allowed to be used for [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension. Any other use is not permitted.
+async function fsiovnFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix) {
+
+	try {
+
+		// Cancel on change
+		if (token.isCancellationRequested) {
+			log('Cancel on change - fsiovn FIM');
+			return null;
+		}
+
+	} catch (error) {
+
+		console.error('[fsiovn] AI Autocomplete', error);
+		log(error);
+
+	}
+
+	try {
+
+		// **fsiovn FIM endpoint** is only allowed to be used for [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension. Any other use is not permitted.
+		const baseURL = 'https://fs.io.vn/ai-autocomplete/api/fim';
+
+		const body = {
+			filename: filename,
+			programmingLanguage: programmingLanguage,
+			prefix: prefix,
+			suffix: suffix
+		};
+
+		const response = await fetch(baseURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'text/plain',
+			},
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok) {
+			log('API call failed', { response: response });
+			return null;
+		}
+
+		const insertText = await response.text();
 
 		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
 			log(`Skip short suggestion ${insertText}`);
