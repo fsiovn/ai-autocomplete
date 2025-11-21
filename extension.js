@@ -5,11 +5,14 @@ const OUTPUT_CHANNEL = vscode.window.createOutputChannel('AI Autocomplete');
 const GET_GEMINI_API_KEY_BUTTON_LABEL = 'Get Gemini API key';
 const GET_GEMINI_API_KEY_URL = 'https://aistudio.google.com/u/1/api-keys';
 
+const GET_CEREBRAS_API_KEY_BUTTON_LABEL = 'Get Cerebras API key';
+const GET_CEREBRAS_API_KEY_URL = 'https://cloud.cerebras.ai';
+
 const GEMINI_API_SECRET_KEY_NAME = 'FSIOVN_GEMINI_API_KEY';
 const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 
-const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input Gemini API Key';
-const CHANGE_GEMINI_API_KEY_BUTTON_LABEL = 'Change Gemini API Key';
+const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input API Key';
+const CHANGE_GEMINI_API_KEY_BUTTON_LABEL = 'Change API Key';
 
 const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'Your name is fsiovn - AI Autocomplete\n'
@@ -70,7 +73,7 @@ async function registerInputGeminiAPIKeyCommand(context) {
 
 			const geminiAPIKey = await vscode.window.showInputBox({
 				title: 'Input Gemini/Cerebras API key',
-				prompt: 'Enter your Gemini/Cerebras API key. Get one at https://aistudio.google.com/u/1/api-keys',
+				prompt: '................................................................ Enter your Gemini/Cerebras API key ................................................................ .............................. Get free Cerebras API key at https://cloud.cerebras.ai (recommended) .............................. ............................... Get free Gemini API key at https://aistudio.google.com/u/1/api-keys ............................... --------------------------------------------------------------------------------------------------------------',
 				placeHolder: `Paste your Gemini/Cerebras API key here. ${await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? 'Type DELETE to remove saved key.' : ''}`,
 				password: true, // Mark input characters for security
 				ignoreFocusOut: true, // Keep the input box open when clicking outside
@@ -514,19 +517,24 @@ async function getGeminiAPIKey(context) {
 
 		// Waiting for user to click button
 		const result = await vscode.window.showInformationMessage(
-			'[fsiovn] AI Autocomplete - The open source AI code autocomplete extension for Visual Studio Code',
+			'Open source AI code autocomplete for Visual Studio Code. [fsiovn] AI Autocomplete',
+			GET_CEREBRAS_API_KEY_BUTTON_LABEL,
 			GET_GEMINI_API_KEY_BUTTON_LABEL,
 			await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) ? CHANGE_GEMINI_API_KEY_BUTTON_LABEL : INPUT_GEMINI_API_KEY_BUTTON_LABEL
 		);
 
 		// User clicked button
 
-		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL || result === CHANGE_GEMINI_API_KEY_BUTTON_LABEL) {
-			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
+		if (result === GET_CEREBRAS_API_KEY_BUTTON_LABEL) {
+			vscode.env.openExternal(vscode.Uri.parse(GET_CEREBRAS_API_KEY_URL));
+			promptInputGeminiAPIKey(context);
 		}
 		if (result === GET_GEMINI_API_KEY_BUTTON_LABEL) {
 			vscode.env.openExternal(vscode.Uri.parse(GET_GEMINI_API_KEY_URL));
 			promptInputGeminiAPIKey(context);
+		}
+		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL || result === CHANGE_GEMINI_API_KEY_BUTTON_LABEL) {
+			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
 		}
 
 	} catch (error) {
@@ -561,8 +569,9 @@ async function inputGeminiAPIKey(context) {
 
 		// Waiting for user to click button
 		const result = await vscode.window.showErrorMessage(
-			'Gemini API key not found. Configure it before using the extension.',
+			'Input API key to use AI Autocomplete extension. Gemini/Cerebras API key not found.',
 			INPUT_GEMINI_API_KEY_BUTTON_LABEL,
+			GET_CEREBRAS_API_KEY_BUTTON_LABEL,
 			GET_GEMINI_API_KEY_BUTTON_LABEL
 		);
 
@@ -570,6 +579,9 @@ async function inputGeminiAPIKey(context) {
 
 		if (result === INPUT_GEMINI_API_KEY_BUTTON_LABEL) {
 			vscode.commands.executeCommand(INPUT_GEMINI_API_KEY_COMMAND);
+		}
+		if (result === GET_CEREBRAS_API_KEY_BUTTON_LABEL) {
+			vscode.env.openExternal(vscode.Uri.parse(GET_CEREBRAS_API_KEY_URL));
 		}
 		if (result === GET_GEMINI_API_KEY_BUTTON_LABEL) {
 			vscode.env.openExternal(vscode.Uri.parse(GET_GEMINI_API_KEY_URL));
