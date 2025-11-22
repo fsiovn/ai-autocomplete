@@ -4,6 +4,8 @@
 
 npm install
 
+npm run lint
+
 rm -f ai-autocomplete-*.vsix
 
 npm install -g @vscode/vsce
@@ -15,3 +17,5 @@ VSIX_FILE=$(ls ai-autocomplete-*.vsix 2>/dev/null | head -n 1)
 echo "\n\n\n${VSIX_FILE}\n\n\n"
 
 vsce publish patch
+
+git push origin --tags

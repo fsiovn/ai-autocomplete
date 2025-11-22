@@ -5,36 +5,36 @@
     <a href="https://github.com/fsiovn/ai-autocomplete/blob/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-blue.png" alt="License Apache 2.0" style="height: 24px"></a>
 </p>
 
-Supports [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)
+   - 🧩 Supports [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)
 
-**Requires a Gemini or Cerebras API key:**
+   - 🛠️ **Requires a Gemini or Cerebras API key:**
 
-   - *Cerebras (recommended):* https://cloud.cerebras.ai
+      - *Cerebras (recommended):* https://cloud.cerebras.ai 📌
 
-   - *Gemini:* https://aistudio.google.com/u/1/api-keys
+      - *Gemini:* https://aistudio.google.com/u/1/api-keys
 
 # Overview
 
-`AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
+   - 📌 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" width="300px" />
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="300px" />
 </p>
 
-`AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
+   - 🌟 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
 
-```sh
-├─ [Content_Types].xml 
-├─ extension.vsixmanifest 
-└─ extension/
-   ├─ LICENSE.txt [11.09 KB]
-   ├─ extension.js [17.77 KB]
-   ├─ icon.png [33.58 KB]
-   ├─ package.json [1.48 KB]
-   └─ readme.md [3.44 KB]
+      ```sh
+      ├─ [Content_Types].xml 
+      ├─ extension.vsixmanifest 
+      └─ extension/
+         ├─ LICENSE.txt [11.09 KB]
+         ├─ extension.js [18.16 KB]
+         ├─ icon.png [33.58 KB]
+         ├─ package.json [1.48 KB]
+         └─ readme.md [3.72 KB]
 
- DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.1.1.vsix (7 files, 40.27 KB)
-```
+      DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.1.2.vsix (7 files, 40.45 KB)
+      ```
 
 # Install
 
@@ -50,18 +50,18 @@ Supports [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio C
 
 # Features
 
-   - Bring Your Own Key (BYOK)
+   - 🚀 Bring Your Own Key (BYOK)
 
-   - AI-generated code
+   - ✨ AI-generated code
 
-   - Inline suggestions
+   - ⚡ Inline suggestions
 
-   - Support for all programming languages
+   - 💡 Support for all programming languages
 
-   - Generate code with comments
+   - 🔧 Generate code with comments
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" width="300px" />
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="300px" />
 </p>
 
 # Privacy & Policies
@@ -81,6 +81,10 @@ Supports [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio C
       - The **fsiovn FIM endpoint** may collect and store data so use your own API key if you're concerned about privacy.
 
    - We disclaim all responsibility.
+
+---
+
+Report issue: https://github.com/fsiovn/ai-autocomplete/issues
 
 ---
 

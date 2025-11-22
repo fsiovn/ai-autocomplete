@@ -4,6 +4,8 @@
 
 npm install
 
+npm run lint
+
 npm install -g @vscode/vsce
 
 vsce package

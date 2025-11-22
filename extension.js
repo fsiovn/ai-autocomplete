@@ -3,8 +3,6 @@ const vscode = require('vscode');
 const TAG = '[fsiovn] AI Autocomplete';
 const DEBUG_MODE = typeof process !== 'undefined' && process?.env?.DEBUG_MODE === 'true';
 
-const OUTPUT_CHANNEL = vscode.window.createOutputChannel('AI Autocomplete');
-
 const GET_GEMINI_API_KEY_BUTTON_LABEL = 'Get Gemini API key';
 const GET_GEMINI_API_KEY_URL = 'https://aistudio.google.com/u/1/api-keys';
 
@@ -134,6 +132,8 @@ async function registerInlineCompletionItemProvider(context) {
 						return null;
 					}
 
+					// const lineSuffix = currentLine.text.substring(position.character);
+
 					const filename = document.fileName;
 
 					const sensitivePatterns = [
@@ -234,8 +234,6 @@ async function registerInlineCompletionItemProvider(context) {
 						}
 					}
 
-					const lineSuffix = currentLine.text.substring(position.character);
-
 					const startPosition = new vscode.Position(0, 0);
 					const prefix = document.getText(new vscode.Range(startPosition, position));
 
@@ -258,6 +256,21 @@ async function registerInlineCompletionItemProvider(context) {
 							new vscode.Range(position, position)
 						)
 					);
+
+					try {
+						const keywordPrefix = linePrefix.replace(/\./g, " ").split(/\s+/).pop();
+
+						if (keywordPrefix && keywordPrefix.length > 1 && String(linePrefix).startsWith(keywordPrefix)) {
+							inlineCompletionItems.push(
+								new vscode.InlineCompletionItem(
+									insertText.slice(keywordPrefix.length),
+									new vscode.Range(position, position)
+								)
+							);
+						}
+					} catch (error) {
+						console.error(TAG, 'Deduplicate prefix of keyword ', error);
+					}
 
 					if (String(linePrefix).endsWith('.')) {
 						inlineCompletionItems.push(
@@ -597,7 +610,7 @@ async function promptInputGeminiAPIKey(context) {
 	try {
 
 		// Attempt to get key, otherwise prompt user to input key
-		await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) || await inputGeminiAPIKey(context);
+		await context.secrets.get(GEMINI_API_SECRET_KEY_NAME) || await inputGeminiAPIKey();
 
 	} catch (error) {
 
@@ -608,7 +621,7 @@ async function promptInputGeminiAPIKey(context) {
 }
 
 // Require async/await
-async function inputGeminiAPIKey(context) {
+async function inputGeminiAPIKey() {
 
 	try {
 

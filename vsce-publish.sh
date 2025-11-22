@@ -4,6 +4,8 @@
 
 npm install
 
+npm run lint
+
 rm -f ai-autocomplete-*.vsix
 
 npm install -g @vscode/vsce
