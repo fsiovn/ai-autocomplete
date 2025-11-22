@@ -34,7 +34,7 @@
   "name": "ai-autocomplete",
   "displayName": "AI-Autocomplete",
   "description": "The open source AI code autocomplete extension for Visual Studio Code",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "vscode": "^1.106.1"
   },
