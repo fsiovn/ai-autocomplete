@@ -1,5 +1,8 @@
 const vscode = require('vscode');
 
+const TAG = '[fsiovn] AI Autocomplete';
+const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
+
 const OUTPUT_CHANNEL = vscode.window.createOutputChannel('AI Autocomplete');
 
 const GET_GEMINI_API_KEY_BUTTON_LABEL = 'Get Gemini API key';
@@ -18,13 +21,12 @@ const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'Your name is fsiovn - AI Autocomplete\n'
 	+ 'FIM mode(Fill-In-the-Middle)\n'
 	+ 'Output format <fim_middle></fim_middle>\n'
-	+ 'Eg: <fim_middle>console.log</fim_middle>\n'
-	+ 'Eg: <fim_middle>System.out.print</fim_middle>\n'
-	+ 'Eg: <fim_middle>int x = 1;\nint y = 1;\\nSystem.out.print("x + y = ", x + y);</fim_middle>\n'
+	+ 'Example output <fim_middle>int x = 1;\nint y = 1;\\nSystem.out.print("x + y = ", x + y);</fim_middle>\n'
 	+ 'Always suggest code snippets longer than 9 characters\n'
 	+ 'Return empty if no valid suggestion <fim_middle></fim_middle>\n'
 	+ 'Syntax must be valid\n'
-	+ 'No explanations, only code completions\n';
+	+ 'No explanations, only code completions\n'
+	+ 'Do not add markdown blocks\n';
 
 let fimCounter = 0;
 
@@ -36,15 +38,14 @@ async function activate(context) {
 
 	try {
 
-		console.log('[fsiovn] AI Autocomplete', 'The open source AI code autocomplete extension for Visual Studio Code');
+		console.log(TAG, 'The open source AI code autocomplete extension for Visual Studio Code');
 
 		try {
 			registerInputGeminiAPIKeyCommand(context);
 			getGeminiAPIKey(context);
 			promptInputGeminiAPIKey(context);
 		} catch (error) {
-			console.error('[fsiovn] AI Autocomplete', error);
-			log(error);
+			console.error(TAG, error);
 		}
 
 		try {
@@ -53,15 +54,12 @@ async function activate(context) {
 
 		} catch (error) {
 
-			console.error('[fsiovn] AI Autocomplete', error);
-			log(error);
-
+			console.error(TAG, error);
 		}
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, error);
 
 	}
 
@@ -104,8 +102,7 @@ async function registerInputGeminiAPIKeyCommand(context) {
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, error);
 
 	}
 
@@ -133,7 +130,7 @@ async function registerInlineCompletionItemProvider(context) {
 						return null;
 					}
 
-					if (String(linePrefix)?.startsWith('</') && String(linePrefix)?.endsWith('>')) {
+					if (String(linePrefix).startsWith('</') && String(linePrefix).endsWith('>')) {
 						return null;
 					}
 
@@ -197,31 +194,31 @@ async function registerInlineCompletionItemProvider(context) {
 
 					if (sensitivePatterns.some(pattern => filename.toLowerCase().includes(pattern))) {
 
-						log(`Skip sensitive file ${filename}`);
+						console.debug(TAG, 'Skip sensitive file', filename);
 
 						return null;
 					}
 
 					// Cancel on change
 					if (token.isCancellationRequested) {
-						log('Cancel on change');
+						console.debug(TAG, 'Cancel on change');
 						return null;
 					}
 
 					const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
-					if (!String(geminiAPIKey)?.startsWith('csk-') && provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
+					if (!String(geminiAPIKey).startsWith('csk-') && provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
 						return null;
 					}
 
-					const delayRatio = String(geminiAPIKey)?.startsWith('csk-') ? 1 : 2
+					const delayRatio = String(geminiAPIKey).startsWith('csk-') ? 1 : 2
 
 					// Debounce
 					await new Promise(resolve => setTimeout(resolve, 500 * delayRatio));
 
 					// Cancel on change
 					if (token.isCancellationRequested) {
-						log('Cancel on change after delay');
+						console.debug(TAG, 'Cancel on change after delay');
 						return null;
 					}
 
@@ -232,7 +229,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 						// Cancel on change
 						if (token.isCancellationRequested) {
-							log('Cancel on change after delay for tab');
+							console.debug(TAG, 'Cancel on change after delay for tab');
 							return null;
 						}
 					}
@@ -249,7 +246,7 @@ async function registerInlineCompletionItemProvider(context) {
 					const insertText = await fillInMiddle(context, token, filename, document?.languageId, prefix, suffix);
 
 					if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
-						log(`Skip short suggestion ${insertText}`);
+						console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 						return null;
 					}
 
@@ -262,21 +259,21 @@ async function registerInlineCompletionItemProvider(context) {
 						)
 					);
 
-					if (String(linePrefix)?.endsWith('.')) {
+					if (String(linePrefix).endsWith('.')) {
 						inlineCompletionItems.push(
 							new vscode.InlineCompletionItem(
-								String(insertText)?.replace(/^[\s.]+/, ''),
+								String(insertText).replace(/^[\s.]+/, ''),
 								new vscode.Range(position, position)
 							)
 						);
-					} else if (String(linePrefix)?.endsWith(' ')) {
+					} else if (String(linePrefix).endsWith(' ')) {
 						inlineCompletionItems.push(
 							new vscode.InlineCompletionItem(
-								String(insertText)?.replace(/^[\s.]+/, ''),
+								String(insertText).replace(/^[\s.]+/, ''),
 								new vscode.Range(position, position)
 							)
 						);
-					} else if (String(linePrefix)?.endsWith(';')) {
+					} else if (String(linePrefix).endsWith(';')) {
 						inlineCompletionItems.push(
 							new vscode.InlineCompletionItem(
 								`\n${insertText}`,
@@ -338,8 +335,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 				} catch (error) {
 
-					console.error('[fsiovn] AI Autocomplete', error);
-					log(error);
+					console.error(TAG, error);
 
 				}
 
@@ -356,8 +352,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'registerInlineCompletionItemProvider', error);
 
 	}
 
@@ -376,14 +371,13 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 
 				// Cancel on change
 				if (token.isCancellationRequested) {
-					log('Cancel on change - FIM');
+					console.debug(TAG, 'Cancel on change - FIM');
 					return null;
 				}
 
 			} catch (error) {
 
-				console.error('[fsiovn] AI Autocomplete', error);
-				log(error);
+				console.error(TAG, 'fillInMiddle', error);
 
 			}
 		}
@@ -394,7 +388,7 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 			return await fsiovnFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix);
 		}
 
-		if (String(geminiAPIKey)?.startsWith('csk-')) {
+		if (String(geminiAPIKey).startsWith('csk-')) {
 			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
 		}
 
@@ -402,8 +396,7 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'fillInMiddle', error);
 
 	}
 
@@ -414,7 +407,7 @@ async function geminiFillInMiddle(context, token, filename, programmingLanguage,
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
 
-	return String(apiKey)?.startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey).startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
@@ -423,7 +416,7 @@ async function cerebrasFillInMiddle(context, token, filename, programmingLanguag
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
 	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
 
-	return String(apiKey)?.startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	return String(apiKey).startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
 
 }
 
@@ -433,14 +426,13 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 		// Cancel on change
 		if (token.isCancellationRequested) {
-			log('Cancel on change - OAI FIM');
+			DEBUG_MODE && console.debug(TAG, 'Cancel on change - OAI FIM');
 			return null;
 		}
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'openAICompatibleFillInMiddle', error);
 
 	}
 
@@ -475,9 +467,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		if (!response.ok && models?.length <= 1) {
 			vscode.window.showErrorMessage(`API call failed with status ${response.status}`);
 
-			console.warn('[fsiovn] AI Autocomplete - API call failed', { model: models, response: response });
-
-			log('API call failed', { model: model, response: response });
+			console.warn(TAG, 'API call failed', { model: model, response: response });
 
 			return null;
 		}
@@ -491,17 +481,10 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 			return await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
 		}
 
-		log({
-			model: model,
-			filename: filename,
-			programmingLanguage: programmingLanguage,
-			prefix: prefix,
-			suffix: suffix,
-			insertText: insertText
-		});
+		DEBUG_MODE && console.debug(TAG, { model: model, filename: filename, programmingLanguage: programmingLanguage, prefix: prefix, suffix: suffix, insertText: insertText });
 
 		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
-			log(`Skip short suggestion ${insertText}`);
+			console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 			return null;
 		}
 
@@ -509,8 +492,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'openAICompatibleFillInMiddle', error);
 
 	}
 
@@ -523,14 +505,13 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 
 		// Cancel on change
 		if (token.isCancellationRequested) {
-			log('Cancel on change - fsiovn FIM');
+			console.debug(TAG, 'Cancel on change - fsiovn FIM');
 			return null;
 		}
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'fsiovnFillInMiddle', error);
 
 	}
 
@@ -555,14 +536,14 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 		});
 
 		if (!response.ok) {
-			log('API call failed', { response: response });
+			console.debug(TAG, 'API call failed', { response: response });
 			return null;
 		}
 
 		const insertText = await response.text();
 
 		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
-			log(`Skip short suggestion ${insertText}`);
+			console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 			return null;
 		}
 
@@ -570,8 +551,7 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'fsiovnFillInMiddle', error);
 
 	}
 
@@ -606,8 +586,7 @@ async function getGeminiAPIKey(context) {
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'getGeminiAPIKey', error);
 
 	}
 
@@ -622,8 +601,7 @@ async function promptInputGeminiAPIKey(context) {
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
+		console.error(TAG, 'promptInputGeminiAPIKey', error);
 
 	}
 
@@ -656,32 +634,7 @@ async function inputGeminiAPIKey(context) {
 
 	} catch (error) {
 
-		console.error('[fsiovn] AI Autocomplete', error);
-		log(error);
-
-	}
-
-}
-
-async function log(...messages) {
-
-	try {
-
-		OUTPUT_CHANNEL.appendLine('\n---\n');
-
-		for (const message of messages) {
-			try {
-				OUTPUT_CHANNEL.appendLine(`[fsiovn] AI Autocomplete\n${message}\n${JSON.stringify(message, null, 4)}`);
-			} catch (error) {
-				console.error('[fsiovn] AI Autocomplete', message, error);
-			}
-		}
-
-		OUTPUT_CHANNEL.appendLine('\n---\n');
-
-	} catch (error) {
-
-		console.error('[fsiovn] AI Autocomplete', messages, error);
+		console.error(TAG, 'inputGeminiAPIKey', error);
 
 	}
 
