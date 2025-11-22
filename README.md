@@ -31,7 +31,7 @@
          ├─ extension.js [18.16 KB]
          ├─ icon.png [33.58 KB]
          ├─ package.json [1.48 KB]
-         └─ readme.md [4.66 KB]
+         └─ readme.md [6.67 KB]
       ```
 # Features
 
@@ -66,6 +66,8 @@
    - 🧪 Actively maintained: Regular updates and improvements based on user feedback and emerging technologies.
 
 # Playground
+
+   > No installation required, works instantly in your browser.
 
    1. Go to https://github.dev.
 
@@ -102,6 +104,54 @@
       - The **fsiovn FIM endpoint** may collect and store data so use your own API key if you're concerned about privacy.
 
    - We disclaim all responsibility.
+
+# Compare with GitHub Copilot
+
+   > GitHub Copilot remains a more full-featured product overall.
+
+   - Pros:
+
+      1. Web support:
+
+         GitHub Copilot still doesn't fully support VS Code for the Web (github.dev, vscode.dev).
+         This extension works seamlessly in web environments, making it ideal for contributing to public repositories without a local setup.
+
+      2. Lightweight:
+      
+         This extension is extremely small - around 40 KB, compared to 33 MB for GitHub Copilot + Copilot Chat.
+
+      3. Focused on autocomplete:
+         
+         The extension is dedicated purely to autocomplete.
+         Users who prefer external chat tools (Cline, KiloCode, ClaudeCode, Codex CLI, etc.) can combine them as they like.
+
+      4. Privacy-friendly (BYOK):
+
+         When users bring their own API key, the extension does not collect or store any code or usage data.
+
+      5. No additional subscription needed:
+
+         Users with a Cerebras Code Pro/Max or Gemini subscription don't need a GitHub Copilot plan.
+
+      6. Better free tiers:
+
+         Cerebras and Gemini both offer more generous free tiers compared to GitHub Copilot's current free tier.
+
+   - Cons:
+
+      1. Copilot is generally more capable overall:
+
+         While inline suggestions work similarly, GitHub Copilot tends to perform better in certain scenarios - especially with more advanced features like Next Edit, multi-file reasoning, and deep context understanding.
+
+      2. No built-in chat:
+
+         Unlike Copilot Chat, this extension intentionally does not include an integrated chat experience (though users can combine it with third-party tools if needed).
+
+      3. Model quality depends on user's API key provider:
+
+         Performance will vary depending on whether users choose Cerebras or Gemini and what tier they're on.
+   
+   > Overall, GitHub Copilot remains a more comprehensive solution, but this extension focuses on being lightweight, open-source, and flexible.
 
 ---
 
