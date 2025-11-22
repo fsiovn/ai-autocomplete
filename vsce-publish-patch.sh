@@ -16,10 +16,8 @@ VSIX_FILE=$(ls ai-autocomplete-*.vsix 2>/dev/null | head -n 1)
 
 echo "\n\n\n${VSIX_FILE}\n\n\n"
 
-vsce publish patch
+vsce publish --pre-release patch
 
 git push
 
 git push origin --tags
-
-vsce publish --pre-release patch
