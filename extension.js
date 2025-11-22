@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 
 const TAG = '[fsiovn] AI Autocomplete';
-const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
+const DEBUG_MODE = typeof process !== 'undefined' && process?.env?.DEBUG_MODE === 'true';
 
 const OUTPUT_CHANNEL = vscode.window.createOutputChannel('AI Autocomplete');
 

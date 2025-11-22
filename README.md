@@ -41,17 +41,17 @@ Support both [Visual Studio Code for the Web](https://vscode.dev/), [Visual Stud
 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
 
 ```sh
-ai-autocomplete-0.0.8.vsix
+ai-autocomplete-0.0.9.vsix
 ├─ [Content_Types].xml 
 ├─ extension.vsixmanifest 
 └─ extension/
    ├─ LICENSE.txt [11.09 KB]
-   ├─ extension.js [17.73 KB]
+   ├─ extension.js [17.77 KB]
    ├─ icon.png [33.58 KB]
    ├─ package.json [1.47 KB]
    └─ readme.md [2.57 KB]
 
- DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.8.vsix (7 files, 39.9 KB)
+ DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.0.9.vsix (7 files, 39.92 KB)
 ```
 
 ---
