@@ -18,4 +18,6 @@ echo "\n\n\n${VSIX_FILE}\n\n\n"
 
 vsce publish patch
 
+git push
+
 git push origin --tags

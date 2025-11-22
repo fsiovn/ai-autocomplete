@@ -18,7 +18,7 @@
    - 📌 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="300px" />
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
 </p>
 
    - 🌟 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
@@ -31,23 +31,8 @@
          ├─ extension.js [18.16 KB]
          ├─ icon.png [33.58 KB]
          ├─ package.json [1.48 KB]
-         └─ readme.md [3.72 KB]
-
-      DONE  Packaged: /workspaces/ai-autocomplete/ai-autocomplete-0.1.2.vsix (7 files, 40.45 KB)
+         └─ readme.md [4.66 KB]
       ```
-
-# Install
-
-   1. Install the extension from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete).
-
-   2. Obtain an `API key` from Cerebras (recommended) or Gemini.
-
-   3. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and run `fsiovn - AI Autocomplete: Input Gemini/Cerebras API key`.
-
-   4. Enter your `API key` when prompted and confirm.
-
-   5. Start coding and enjoy AI-powered autocomplete suggestions in real-time.
-
 # Features
 
    - 🚀 Bring Your Own Key (BYOK)
@@ -61,8 +46,44 @@
    - 🔧 Generate code with comments
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="300px" />
+   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
 </p>
+
+# Why choose this extension?
+
+   - 🔓 Open-source and transparent: The entire codebase is publicly available, allowing for community contributions and audits.
+
+   - 🏗️ Lightweight and efficient: Minimal resource usage ensures smooth performance without slowing down your editor.
+
+   - 🔑 Bring Your Own Key (BYOK): Full control over your API keys and data privacy with support for Cerebras and Gemini.
+
+   - 🌐 Cross-platform compatibility: Works seamlessly across VS Code Web, Desktop, and GitHub environments.
+
+   - 🤖 Real-time AI suggestions: Get intelligent code completions as you type, powered by state-of-the-art language models.
+
+   - 📄 Comment-to-code generation: Write comments and let the AI generate the corresponding code automatically.
+
+   - 🧪 Actively maintained: Regular updates and improvements based on user feedback and emerging technologies.
+
+# Playground
+
+   1. Go to https://github.dev.
+
+   2. Install `AI-Autocomplete` extension.
+
+   3. Enjoy inline autocomplete.
+
+# Install
+
+   1. Install the extension from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete).
+
+   2. Obtain an `API key` from Cerebras (recommended) or Gemini.
+
+   3. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and run `fsiovn - AI Autocomplete: Input Gemini/Cerebras API key`.
+
+   4. Enter your `API key` when prompted and confirm.
+
+   5. Start coding and enjoy AI-powered autocomplete suggestions in real-time.
 
 # Privacy & Policies
 
@@ -74,7 +95,7 @@
 
    - If you use your own API key, we do not collect or store any of your data.
 
-   - If you do not provide an API key, the **fsiovn FIM endpoint** will be used by default.
+   - If you do not provide an API key, the **fsiovn FIM (Fill-in-the-middle) endpoint** will be used by default.
 
       - The **fsiovn FIM endpoint** is only allowed to be used with the [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension so all other uses are prohibited.
 
