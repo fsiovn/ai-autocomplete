@@ -28,22 +28,22 @@
       ├─ extension.vsixmanifest 
       └─ extension/
          ├─ LICENSE.txt [11.09 KB]
-         ├─ extension.js [18.16 KB]
+         ├─ extension.js [17.94 KB]
          ├─ icon.png [33.58 KB]
          ├─ package.json [1.48 KB]
-         └─ readme.md [6.76 KB]
+         └─ readme.md [7.47 KB]
       ```
 # Features
 
-   1. 🚀 Bring Your Own Key (BYOK)
+   - 🚀 Bring Your Own Key (BYOK)
 
-   2. ✨ AI-generated code
+   - ✨ AI-generated code
 
-   3. ⚡ Inline suggestions
+   - ⚡ Inline suggestions
 
-   4. 💡 Support for all programming languages
+   - 💡 Support for all programming languages
 
-   5. 🔧 Generate code with comments
+   - 🔧 Generate code with comments
 
 <p align="center">
    <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
@@ -51,23 +51,37 @@
 
 # Why choose this extension?
 
-   1. 🔓 Open-source and transparent: The entire codebase is publicly available, allowing for community contributions and audits.
+   - 🔓 Open-source and transparent:
+   
+      *The entire codebase is publicly available, allowing for community contributions and audits.*
 
-   2. 🏗️ Lightweight and efficient: Minimal resource usage ensures smooth performance without slowing down your editor.
+   - 🏗️ Lightweight and efficient:
 
-   3. 🔑 Bring Your Own Key (BYOK): Full control over your API keys and data privacy with support for Cerebras and Gemini.
+      *Minimal resource usage ensures smooth performance without slowing down your editor.*
 
-   4. 🌐 Cross-platform compatibility: Works seamlessly across VS Code Web, Desktop, and GitHub environments.
+   - 🔑 Bring Your Own Key (BYOK):
 
-   5. 🤖 Real-time AI suggestions: Get intelligent code completions as you type, powered by state-of-the-art language models.
+      *Full control over your API keys and data privacy with support for Cerebras and Gemini.*
 
-   6. 📄 Comment-to-code generation: Write comments and let the AI generate the corresponding code automatically.
+   - 🌐 Cross-platform compatibility:
 
-   7. 🧪 Actively maintained: Regular updates and improvements based on user feedback and emerging technologies.
+      *Works seamlessly across VS Code Web, Desktop, and GitHub environments.*
+
+   - 🤖 Real-time AI suggestions:
+   
+      *Get intelligent code completions as you type, powered by AI*
+
+   - 📄 Comment-to-code generation:
+   
+      *Write comments and let the AI generate the corresponding code automatically.*
+
+   - 🧪 Actively maintained:
+   
+      *Regular updates and improvements based on user feedback and emerging technologies.*
 
 # Playground
 
-   > No installation required, works instantly in your browser.
+   > Works instantly in your browser.
 
    1. Go to https://github.dev.
 
@@ -75,11 +89,11 @@
 
    3. Enjoy inline autocomplete.
 
-# Install
+# Setup
 
    1. Install the extension from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete).
 
-   2. Obtain an `API key` from Cerebras (recommended) or Gemini.
+   2. Obtain an `API key` from Cerebras (**recommended**) or Gemini.
 
    3. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and run `fsiovn - AI Autocomplete: Input Gemini/Cerebras API key`.
 
@@ -87,29 +101,43 @@
 
    5. Start coding and enjoy AI-powered autocomplete suggestions in real-time.
 
+# Settings
+
+   - **Ghost text suggestions settings**
+
+      https://code.visualstudio.com/docs/copilot/ai-powered-suggestions#_ghost-text-suggestions-settings
+
+      - [editor.inlineSuggest.fontFamily](vscode://settings/editor.inlineSuggest.fontFamily) - configure the font for the inline completions.
+
+      - [editor.inlineSuggest.showToolbar](vscode://settings/editor.inlineSuggest.showToolbar) - enable or disable the toolbar that appears for inline completions.
+
+         - *Recommended `editor.inlineSuggest.showToolbar` is `always`.*
+
+      - [editor.inlineSuggest.syntaxHighlightingEnabled](vscode://settings/editor.inlineSuggest.syntaxHighlightingEnabled) - enable or disable syntax highlighting for inline completions.
+
 # Privacy & Policies
 
-   1. [Cerebras Policies](https://www.cerebras.ai/policies)
+   - [Cerebras Policies](https://www.cerebras.ai/policies)
 
-   2. [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms)
+   - [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms)
 
-   3. [Cloudflare Terms of Use](https://www.cloudflare.com/website-terms/)
+   - [Cloudflare Terms of Use](https://www.cloudflare.com/website-terms/)
 
-   4. If you use your own API key, we do not collect or store any of your data.
+   - If you use your own API key, we do not collect or store any of your data.
 
-   5. If you do not provide an API key, the **fsiovn FIM (Fill-in-the-middle) endpoint** will be used by default.
+   - If you do not provide an API key, the **fsiovn FIM (Fill-in-the-middle) endpoint** will be used by default.
 
       - The **fsiovn FIM endpoint** is only allowed to be used with the [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension so all other uses are prohibited.
 
       - The **fsiovn FIM endpoint** may collect and store data so use your own API key if you're concerned about privacy.
 
-   6. We disclaim all responsibility.
+   - We disclaim all responsibility.
 
 # Compare with GitHub Copilot
 
    > GitHub Copilot remains a more full-featured product overall.
 
-   1. **Pros**:
+   - **Pros**:
 
       1. **Web support**:
 
@@ -138,7 +166,7 @@
 
          *Cerebras and Gemini both offer more generous free tiers compared to GitHub Copilot's current free tier.*
 
-   2. **Cons**:
+   - **Cons**:
 
       1. **Copilot is generally more capable overall**:
 

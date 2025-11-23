@@ -15,6 +15,62 @@ const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input API Key';
 const CHANGE_GEMINI_API_KEY_BUTTON_LABEL = 'Change API Key';
 
+const FILENAME_SENSITIVE_KEYWORDS = [
+	'_history',
+	'.bak',
+	'.bash',
+	'.crt',
+	'.db',
+	'.dump',
+	'.env',
+	'.git',
+	'.gitignore',
+	'.hg',
+	'.htaccess',
+	'.htpasswd',
+	'.key',
+	'.log',
+	'.p12',
+	'.pem',
+	'.pfx',
+	'.pub',
+	'.sql',
+	'.sqlite',
+	'.svn',
+	'.swp',
+	'.zsh',
+	'api_key',
+	'appsettings',
+	'auth',
+	'authorized_keys',
+	'aws',
+	'azure',
+	'backup',
+	'bitbucket',
+	'config.',
+	'credential',
+	'credentials.json',
+	'docker-compose',
+	'dockerfile',
+	'gcloud',
+	'google-services',
+	'id_dsa',
+	'id_ed25519',
+	'id_rsa',
+	'keystore',
+	'known_hosts',
+	'oauth',
+	'password',
+	'php.ini',
+	'secret',
+	'secrets.json',
+	'service-account',
+	'settings.py',
+	'token',
+	'web.config',
+	'wp-config'
+];
+
 const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'Your name is fsiovn - AI Autocomplete\n'
 	+ 'FIM mode(Fill-In-the-Middle)\n'
@@ -136,63 +192,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 					const filename = document.fileName;
 
-					const sensitivePatterns = [
-						'_history',
-						'.bak',
-						'.bash',
-						'.crt',
-						'.db',
-						'.dump',
-						'.env',
-						'.git',
-						'.gitignore',
-						'.hg',
-						'.htaccess',
-						'.htpasswd',
-						'.key',
-						'.log',
-						'.p12',
-						'.pem',
-						'.pfx',
-						'.pub',
-						'.sql',
-						'.sqlite',
-						'.svn',
-						'.swp',
-						'.zsh',
-						'api_key',
-						'appsettings',
-						'auth',
-						'authorized_keys',
-						'aws',
-						'azure',
-						'backup',
-						'bitbucket',
-						'config.',
-						'credential',
-						'credentials.json',
-						'docker-compose',
-						'dockerfile',
-						'gcloud',
-						'google-services',
-						'id_dsa',
-						'id_ed25519',
-						'id_rsa',
-						'keystore',
-						'known_hosts',
-						'oauth',
-						'password',
-						'php.ini',
-						'secret',
-						'secrets.json',
-						'service-account',
-						'settings.py',
-						'token',
-						'web.config',
-						'wp-config'
-					];
-
-					if (sensitivePatterns.some(pattern => filename.toLowerCase().includes(pattern))) {
+					if (FILENAME_SENSITIVE_KEYWORDS.some(filenameSensitiveKeyword => filename.toLowerCase().includes(filenameSensitiveKeyword))) {
 
 						console.debug(TAG, 'Skip sensitive file', filename);
 
@@ -211,7 +211,7 @@ async function registerInlineCompletionItemProvider(context) {
 						return null;
 					}
 
-					const delayRatio = String(geminiAPIKey).startsWith('csk-') ? 1 : 2
+					const delayRatio = String(geminiAPIKey).startsWith('csk-') ? 1 : 2;
 
 					// Debounce
 					await new Promise(resolve => setTimeout(resolve, 500 * delayRatio));
@@ -258,7 +258,7 @@ async function registerInlineCompletionItemProvider(context) {
 					);
 
 					try {
-						const keywordPrefix = linePrefix.replace(/\./g, " ").split(/\s+/).pop();
+						const keywordPrefix = linePrefix.replace(/\./g, '').split(/\s+/).pop();
 
 						if (keywordPrefix && keywordPrefix.length > 1 && String(linePrefix).startsWith(keywordPrefix)) {
 							inlineCompletionItems.push(
@@ -477,7 +477,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 			body: JSON.stringify(body),
 		});
 
-		if (!response.ok && models?.length <= 1) {
+		if (!response.ok && models?.length < 1) {
 			vscode.window.showErrorMessage(`API call failed with status ${response.status}`);
 
 			console.warn(TAG, 'API call failed', { model: model, response: response });
@@ -490,7 +490,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
-		if (!insertText && models?.length > 1) {
+		if (!insertText && models?.length > 0) {
 			return await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
 		}
 

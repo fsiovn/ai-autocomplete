@@ -3,5 +3,6 @@
     "editor.formatOnPaste": true,
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 500,
-    "terminal.integrated.defaultProfile.windows": "Command Prompt"
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "editor.inlineSuggest.showToolbar": "always"
 }
