@@ -2,5 +2,14 @@
     "image": "node:latest",
     "forwardPorts": [
         3000
-    ]
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "ms-vscode.extension-test-runner",
+                "fsiovn.ai-autocomplete"
+            ]
+        }
+    }
 }
