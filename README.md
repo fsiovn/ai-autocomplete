@@ -28,10 +28,10 @@
       ├─ extension.vsixmanifest 
       └─ extension/
          ├─ LICENSE.txt [11.09 KB]
-         ├─ extension.js [17.94 KB]
+         ├─ extension.js [18.53 KB]
          ├─ icon.png [33.58 KB]
          ├─ package.json [1.48 KB]
-         └─ readme.md [7.47 KB]
+         └─ readme.md [7.49 KB]
       ```
 # Features
 
@@ -83,7 +83,7 @@
 
    > Works instantly in your browser.
 
-   1. Go to https://github.dev.
+   1. Go to https://vscode.dev or https://github.dev.
 
    2. Install `AI-Autocomplete` extension.
 

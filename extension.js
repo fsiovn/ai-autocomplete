@@ -166,11 +166,16 @@ async function registerInlineCompletionItemProvider(context) {
 
 	try {
 
+		/** @type {vscode.DocumentSelector} */
 		const inlineCompletionItemDocumentSelector = { pattern: '**' };
 
+		/** @type {vscode.InlineCompletionItemProvider} */
 		const inlineCompletionItemProvider = {
 
-			provideInlineCompletionItems: async (document, position, provideInlineCompletionItemsContext, token) => {
+			/**
+			 * @type {vscode.InlineCompletionItemProvider['provideInlineCompletionItems']} 
+			 */
+			provideInlineCompletionItems: async (document, position, inlineCompletionContext, token) => {
 
 				try {
 
@@ -207,7 +212,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 					const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
-					if (!String(geminiAPIKey).startsWith('csk-') && provideInlineCompletionItemsContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
+					if (!String(geminiAPIKey).startsWith('csk-') && inlineCompletionContext?.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
 						return null;
 					}
 
@@ -250,17 +255,10 @@ async function registerInlineCompletionItemProvider(context) {
 
 					const inlineCompletionItems = [];
 
-					inlineCompletionItems.push(
-						new vscode.InlineCompletionItem(
-							insertText,
-							new vscode.Range(position, position)
-						)
-					);
-
 					try {
 						const keywordPrefix = linePrefix.replace(/\./g, '').split(/\s+/).pop();
 
-						if (keywordPrefix && keywordPrefix.length > 1 && String(linePrefix).startsWith(keywordPrefix)) {
+						if (keywordPrefix && (linePrefix.length < 9 || keywordPrefix.length > 1) && String(insertText).startsWith(keywordPrefix)) {
 							inlineCompletionItems.push(
 								new vscode.InlineCompletionItem(
 									insertText.slice(keywordPrefix.length),
@@ -271,6 +269,13 @@ async function registerInlineCompletionItemProvider(context) {
 					} catch (error) {
 						console.error(TAG, 'Deduplicate prefix of keyword ', error);
 					}
+
+					inlineCompletionItems.push(
+						new vscode.InlineCompletionItem(
+							insertText,
+							new vscode.Range(position, position)
+						)
+					);
 
 					if (String(linePrefix).endsWith('.')) {
 						inlineCompletionItems.push(
@@ -356,12 +361,12 @@ async function registerInlineCompletionItemProvider(context) {
 
 		}
 
-		const inlineCompletionProviderDisposable = vscode.languages.registerInlineCompletionItemProvider(
+		const inlineCompletionItemProviderDisposable = vscode.languages.registerInlineCompletionItemProvider(
 			inlineCompletionItemDocumentSelector,
 			inlineCompletionItemProvider
 		);
 
-		context.subscriptions.push(inlineCompletionProviderDisposable);
+		context.subscriptions.push(inlineCompletionItemProviderDisposable);
 
 	} catch (error) {
 
@@ -485,8 +490,15 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 			return null;
 		}
 
+		/**
+		 * @type {{ choices?: { message?: { content: string } }[]? }}
+		 */
 		const data = await response.json();
 		const content = data?.choices?.[0]?.message?.content;
+
+		if (content === '<fim_middle></fim_middle>') {
+			return null;
+		}
 
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
 
@@ -511,7 +523,8 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 }
 
-// **fsiovn FIM endpoint** is only allowed to be used for [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension. Any other use is not permitted.
+// The **fsiovn FIM endpoint** is only allowed to be used with the [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension so all other uses are prohibited.
+// The **fsiovn FIM endpoint** may collect and store data so use your own API key if you're concerned about privacy.
 async function fsiovnFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix) {
 
 	try {
@@ -530,7 +543,8 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 
 	try {
 
-		// **fsiovn FIM endpoint** is only allowed to be used for [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension. Any other use is not permitted.
+		// The **fsiovn FIM endpoint** is only allowed to be used with the [AI Autocomplete](https://marketplace.visualstudio.com/items?itemName=fsiovn.ai-autocomplete) extension so all other uses are prohibited.
+		// The **fsiovn FIM endpoint** may collect and store data so use your own API key if you're concerned about privacy.
 		const baseURL = 'https://fs.io.vn/ai-autocomplete/api/fim';
 
 		const body = {
