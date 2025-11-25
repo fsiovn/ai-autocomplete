@@ -51,7 +51,7 @@
     "commands": [
       {
         "command": "ai-autocomplete.inputGeminiAPIKey",
-        "title": "Input Gemini/Cerebras API key",
+        "title": "Input OpenAI compatible API key",
         "category": "fsiovn - AI Autocomplete"
       }
     ]

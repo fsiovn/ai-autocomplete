@@ -400,17 +400,30 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 			}
 		}
 
-		const geminiAPIKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
+		const apiKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
-		if (!geminiAPIKey) {
+		if (!apiKey) {
 			return await fsiovnFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix);
 		}
 
-		if (String(geminiAPIKey).startsWith('csk-')) {
-			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
+		if (String(apiKey).startsWith('csk-')) {
+			return await cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey);
 		}
 
-		return await geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, geminiAPIKey);
+		if (String(apiKey).startsWith('AIza')) {
+			return await geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey);
+		}
+
+		const baseURL = '';
+		const model = '';
+
+		if (baseURL && (String(baseURL).endsWith("/chat/completions") || String(baseURL).endsWith("/chat/completions/")) && model) {
+			const insertText = await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, [model]);
+
+			return String(insertText).includes("\\n") && !String(insertText).includes("\n") ? insertText.replaceAll("\\n", "\n") : insertText;
+		}
+
+		return null;
 
 	} catch (error) {
 
