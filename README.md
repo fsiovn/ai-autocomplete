@@ -5,21 +5,42 @@
     <a href="https://github.com/fsiovn/ai-autocomplete/blob/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-blue.png" alt="License Apache 2.0" style="height: 24px"></a>
 </p>
 
+### AI Autocomplete is a lightweight open source AI code autocomplete extension for Visual Studio Code
+
+   - 🚀 **Bring Your Own Key (BYOK)**
+
    - 🧩 Supports [Visual Studio Code for the Web](https://vscode.dev/), [Visual Studio Code Desktop](https://code.visualstudio.com/) and [GitHub](https://github.dev/fsiovn/ai-autocomplete/)
 
-   - 🛠️ **Requires a Gemini or Cerebras API key:**
+   - 🔑 Supports [Cerebras](https://cloud.cerebras.ai) and [Gemini](https://aistudio.google.com/u/1/api-keys) API key.
 
-      - *Cerebras (recommended):* https://cloud.cerebras.ai 📌
+# Features
 
-      - *Gemini:* https://aistudio.google.com/u/1/api-keys
+   - ✨ AI-generated code
+
+   - ⚡ Inline suggestions
+
+   - 💡 Support for all programming languages
+
+   - 🎯 Generate code with comments
 
 # Overview
 
-   - 📌 `AI Autocomplete` - The open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
+   - 📌 `AI Autocomplete` - The lightweight open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
 
-<p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
-</p>
+<table>
+   <tr>
+      <td>
+         <p align="center">
+            <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
+         </p>
+      </td>
+      <td>
+         <p align="center">
+            <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
+         </p>
+      </td>
+   </tr>
+</table>
 
    - 🌟 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
 
@@ -33,21 +54,6 @@
          ├─ package.json [1.48 KB]
          └─ readme.md [7.49 KB]
       ```
-# Features
-
-   - 🚀 Bring Your Own Key (BYOK)
-
-   - ✨ AI-generated code
-
-   - ⚡ Inline suggestions
-
-   - 💡 Support for all programming languages
-
-   - 🔧 Generate code with comments
-
-<p align="center">
-   <img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/demo-prompt.gif" alt="Demo of AI autocomplete suggesting code in VS Code" width="600px" />
-</p>
 
 # Why choose this extension?
 
