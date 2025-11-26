@@ -5,7 +5,7 @@
     <a href="https://github.com/fsiovn/ai-autocomplete/blob/main/LICENSE"><img src="https://raw.githubusercontent.com/fsiovn/ai-autocomplete/refs/heads/main/License-Apache_2.0-blue.png" alt="License Apache 2.0" style="height: 24px"></a>
 </p>
 
-### AI Autocomplete is a lightweight open source AI code autocomplete extension for Visual Studio Code
+### The lightweight open source AI code autocomplete extension for Visual Studio Code
 
    - 🚀 **Bring Your Own Key (BYOK)**
 
@@ -23,9 +23,7 @@
 
    - 🎯 Generate code with comments
 
-# Overview
-
-   - 📌 `AI Autocomplete` - The lightweight open [source](https://github.com/fsiovn/ai-autocomplete) AI code autocomplete extension for Visual Studio Code.
+# Demo
 
 <table>
    <tr>
@@ -41,19 +39,6 @@
       </td>
    </tr>
 </table>
-
-   - 🌟 `AI Autocomplete` - The lightweight Visual Studio Code extension for autocomplete.
-
-      ```sh
-      ├─ [Content_Types].xml 
-      ├─ extension.vsixmanifest 
-      └─ extension/
-         ├─ LICENSE.txt [11.09 KB]
-         ├─ extension.js [18.53 KB]
-         ├─ icon.png [33.58 KB]
-         ├─ package.json [1.48 KB]
-         └─ readme.md [7.49 KB]
-      ```
 
 # Why choose this extension?
 
