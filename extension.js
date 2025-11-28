@@ -513,7 +513,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 			return null;
 		}
 
-		return insertText;
+		return String(insertText).includes("\\n") && !String(insertText).includes("\n") ? insertText.replaceAll("\\n", "\n") : insertText;
 
 	} catch (error) {
 
