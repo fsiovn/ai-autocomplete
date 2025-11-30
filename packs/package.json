@@ -1,0 +1,49 @@
+{
+  "publisher": "fsiovn",
+  "author": {
+    "name": "fsiovn",
+    "email": "fsiovn@gmail.com"
+  },
+  "icon": "/icon.png",
+  "homepage": "https://github.com/fsiovn/ai-autocomplete",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fsiovn/ai-autocomplete"
+  },
+  "extensionKind": [
+    "workspace",
+    "ui"
+  ],
+  "keywords": [
+    "ai",
+    "autocomplete",
+    "react",
+    "python",
+    "c++",
+    "java",
+    "c#",
+    "javascript",
+    "go",
+    "golang",
+    "php",
+    "typescript",
+    "c",
+    "ruby",
+    "kotlin"
+  ],
+  "name": "ai-gateway",
+  "displayName": "AI Gateway",
+  "description": "The lightweight open source AI code autocomplete",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Extension Packs",
+    "AI",
+    "Programming Languages"
+  ],
+  "extensionPack": [
+    "fsiovn.ai-autocomplete"
+  ]
+}
