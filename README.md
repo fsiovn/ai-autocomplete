@@ -106,6 +106,16 @@
 
       - [editor.inlineSuggest.syntaxHighlightingEnabled](vscode://settings/editor.inlineSuggest.syntaxHighlightingEnabled) - enable or disable syntax highlighting for inline completions.
 
+   - **Select model**
+
+      *Advanced setting - recommended skip this setting*
+
+      - Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and run `fsiovn - AI Autocomplete: Select model`.
+
+      - Choose model
+
+         - *Recommended `model` is `default`*
+
 # Privacy & Policies
 
    - [Cerebras Policies](https://www.cerebras.ai/policies)

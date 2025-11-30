@@ -12,6 +12,8 @@ const GET_CEREBRAS_API_KEY_URL = 'https://cloud.cerebras.ai';
 const GEMINI_API_SECRET_KEY_NAME = 'FSIOVN_GEMINI_API_KEY';
 const INPUT_GEMINI_API_KEY_COMMAND = 'ai-autocomplete.inputGeminiAPIKey';
 
+const SELECT_MODEL_COMMAND = "ai-autocomplete.selectModel"
+
 const INPUT_GEMINI_API_KEY_BUTTON_LABEL = 'Input API Key';
 const CHANGE_GEMINI_API_KEY_BUTTON_LABEL = 'Change API Key';
 
@@ -111,6 +113,16 @@ async function activate(context) {
 			console.error(TAG, error);
 		}
 
+		try {
+
+			registerSelectModelCommand(context);
+
+		} catch (error) {
+
+			console.error(TAG, error);
+
+		}
+
 	} catch (error) {
 
 		console.error(TAG, error);
@@ -153,6 +165,45 @@ async function registerInputGeminiAPIKeyCommand(context) {
 		});
 
 		context.subscriptions.push(inputGeminiAPIKeyCommandDisposable);
+
+	} catch (error) {
+
+		console.error(TAG, error);
+
+	}
+
+}
+
+async function registerSelectModelCommand(context) {
+
+	try {
+
+		const selectModelCommandDisposable = vscode.commands.registerCommand(SELECT_MODEL_COMMAND, async function () {
+
+			const models = ['default'];
+
+			const apiKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
+
+			if (String(apiKey).startsWith('csk-')) {
+				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6')
+			}
+
+			if (String(apiKey).startsWith('AIza')) {
+				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro')
+			}
+
+			const model = await vscode.window.showQuickPick(models, {
+				title: 'Select model',
+				placeHolder: 'Recommended model is default',
+			});
+
+			if (model) {
+				await context.globalState.update('ai-autocomplete.model', model);
+			}
+
+		});
+
+		context.subscriptions.push(selectModelCommandDisposable);
 
 	} catch (error) {
 
@@ -425,7 +476,9 @@ async function geminiFillInMiddle(context, token, filename, programmingLanguage,
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
 
-	return String(apiKey).startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	const model = await context.globalState.get('ai-autocomplete.model');
+
+	return String(apiKey).startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models.includes(model) ? [model] : models) : null;
 
 }
 
@@ -434,7 +487,9 @@ async function cerebrasFillInMiddle(context, token, filename, programmingLanguag
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
 	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
 
-	return String(apiKey).startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) : null;
+	const model = await context.globalState.get('ai-autocomplete.model');
+
+	return String(apiKey).startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models.includes(model) ? [model] : models) : null;
 
 }
 

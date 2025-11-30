@@ -53,6 +53,11 @@
         "command": "ai-autocomplete.inputGeminiAPIKey",
         "title": "Input Gemini/Cerebras API key",
         "category": "fsiovn - AI Autocomplete"
+      },
+      {
+        "command": "ai-autocomplete.selectModel",
+        "title": "Select model",
+        "category": "fsiovn - AI Autocomplete"
       }
     ]
   },
