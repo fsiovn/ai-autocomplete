@@ -185,11 +185,11 @@ async function registerSelectModelCommand(context) {
 			const apiKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
 			if (String(apiKey).startsWith('csk-')) {
-				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6')
+				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6');
 			}
 
 			if (String(apiKey).startsWith('AIza')) {
-				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro')
+				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro');
 			}
 
 			const model = await vscode.window.showQuickPick(models, {
@@ -474,7 +474,7 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 async function geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
+	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro'];
 
 	const model = await context.globalState.get('ai-autocomplete.model');
 
@@ -516,10 +516,6 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		const body = {
 			model: model,
 			messages: [
-				{
-					role: 'system',
-					content: FIM_INSTRUCTION
-				},
 				{
 					role: 'user',
 					content: `${FIM_INSTRUCTION}\n<filename>${filename}</filename>\n<programming_language>${programmingLanguage}</programming_language>\n<fim_prefix>${prefix}</fim_prefix>\n<fim_suffix>${suffix}</fim_suffix>`,
