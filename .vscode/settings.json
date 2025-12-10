@@ -4,5 +4,6 @@
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 500,
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "editor.inlineSuggest.showToolbar": "always"
+    "editor.inlineSuggest.showToolbar": "always",
+    "workbench.editor.wrapTabs": true
 }

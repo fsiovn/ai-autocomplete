@@ -84,6 +84,10 @@ const FIM_INSTRUCTION = 'You are a code completion assistant\n'
 	+ 'No explanations, only code completions\n'
 	+ 'Do not add markdown blocks\n';
 
+const CEREBRAS_DEFAULT_MODELS = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'zai-glm-4.7'];
+
+const GEMINI_DEFAULT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemma-4-31b-it', 'gemma-4-26b-a4b-it', 'gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemma-3-27b-it', 'gemini-pro-latest'];
+
 let fimCounter = 0;
 
 // This method is called when your extension is activated
@@ -185,11 +189,11 @@ async function registerSelectModelCommand(context) {
 			const apiKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
 			if (String(apiKey).startsWith('csk-')) {
-				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6');
+				models.push(...CEREBRAS_DEFAULT_MODELS);
 			}
 
 			if (String(apiKey).startsWith('AIza')) {
-				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro');
+				models.push(...GEMINI_DEFAULT_MODELS);
 			}
 
 			const model = await vscode.window.showQuickPick(models, {
@@ -474,22 +478,68 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 async function geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro'];
 
 	const model = await context.globalState.get('ai-autocomplete.model');
 
-	return String(apiKey).startsWith('AIza') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models.includes(model) ? [model] : models) : null;
+	return String(apiKey).startsWith('AIza') ? await openAICompatibleFillInMiddleFailover(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, GEMINI_DEFAULT_MODELS.includes(model) ? [model] : [...GEMINI_DEFAULT_MODELS]) : null;
 
 }
 
 async function cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
-	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
 
 	const model = await context.globalState.get('ai-autocomplete.model');
 
-	return String(apiKey).startsWith('csk-') ? await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models.includes(model) ? [model] : models) : null;
+	return String(apiKey).startsWith('csk-') ? await openAICompatibleFillInMiddleFailover(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, CEREBRAS_DEFAULT_MODELS.includes(model) ? [model] : [...CEREBRAS_DEFAULT_MODELS]) : null;
+
+}
+
+async function openAICompatibleFillInMiddleFailover(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) {
+
+	// const primaryController = new AbortController();
+	// const fallbackController = new AbortController();
+
+	/**
+	 * @type {string | number | NodeJS.Timeout | undefined}
+	 */
+	let timeoutId;
+
+	const fallback = new Promise(async (resolve) => {
+
+		timeoutId = setTimeout(
+			() => {
+
+				// TODO models must be immutable
+				// models?.shift();
+
+				resolve(
+					openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
+				)
+			},
+			5000
+		)
+
+	});
+
+	const primary = openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
+		.then((result) => {
+
+			try {
+
+				clearTimeout(timeoutId);
+
+			} catch (error) {
+
+				console.error(TAG, 'openAICompatibleFillInMiddleController', error);
+
+			}
+
+			return result;
+
+		});
+
+	return Promise.race([primary, fallback]);
 
 }
 
@@ -511,7 +561,8 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 	try {
 
-		const model = models?.shift();
+		// TODO models must be immutable
+		const model = models.shift();
 
 		const body = {
 			model: model,
@@ -545,7 +596,9 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		 * @type {{ choices?: { message?: { content: string } }[]? }}
 		 */
 		const data = await response.json();
-		const content = data?.choices?.[0]?.message?.content;
+		const content = data?.choices?.[0]?.message?.content?.
+			replace(/^.*?<\/thought><fim_middle>/s, '<fim_middle>')?.
+			replace(/^.*?<\/think>\n\n<fim_middle>/s, '<fim_middle>');
 
 		if (content === '<fim_middle></fim_middle>') {
 			return null;
