@@ -185,11 +185,11 @@ async function registerSelectModelCommand(context) {
 			const apiKey = await context.secrets.get(GEMINI_API_SECRET_KEY_NAME);
 
 			if (String(apiKey).startsWith('csk-')) {
-				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6');
+				models.push('qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'zai-glm-4.6');
 			}
 
 			if (String(apiKey).startsWith('AIza')) {
-				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro');
+				models.push('gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3-flash-preview', 'gemma-3-27b-it');
 			}
 
 			const model = await vscode.window.showQuickPick(models, {
@@ -474,7 +474,7 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 async function geminiFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-3-27b-it', 'gemma-3-12b-it', 'gemini-2.5-pro'];
+	const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3-flash-preview', 'gemma-3-27b-it'];
 
 	const model = await context.globalState.get('ai-autocomplete.model');
 
@@ -485,7 +485,7 @@ async function geminiFillInMiddle(context, token, filename, programmingLanguage,
 async function cerebrasFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, apiKey) {
 
 	const baseURL = 'https://api.cerebras.ai/v1/chat/completions';
-	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'llama3.1-8b', 'zai-glm-4.6'];
+	const models = ['qwen-3-235b-a22b-instruct-2507', 'gpt-oss-120b', 'llama-3.3-70b', 'qwen-3-32b', 'zai-glm-4.6'];
 
 	const model = await context.globalState.get('ai-autocomplete.model');
 
@@ -545,7 +545,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		 * @type {{ choices?: { message?: { content: string } }[]? }}
 		 */
 		const data = await response.json();
-		const content = data?.choices?.[0]?.message?.content;
+		const content = data?.choices?.[0]?.message?.content?.replace(/^.*?<\/think>\n\n<fim_middle>/s, '<fim_middle>');
 
 		if (content === '<fim_middle></fim_middle>') {
 			return null;
