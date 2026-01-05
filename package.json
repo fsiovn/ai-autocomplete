@@ -59,7 +59,28 @@
         "title": "Select model",
         "category": "fsiovn - AI Autocomplete"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-autocomplete-activity-bar",
+          "title": "AI Autocomplete",
+          "icon": "activity-bar.svg",
+          "darkIcon": "activity-bar.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-autocomplete-activity-bar": [
+        {
+          "id": "ai-autocomplete-sidebar",
+          "name": "Settings",
+          "icon": "activity-bar.svg",
+          "darkIcon": "activity-bar.svg",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint .",
@@ -72,7 +93,7 @@
     "@types/vscode": "^1.106.1",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
-    "@vscode/test-web": "^0.0.75",
+    "@vscode/test-web": "^0.0.78",
     "eslint": "^9.39.1"
   }
 }
