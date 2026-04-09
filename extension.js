@@ -508,14 +508,18 @@ async function openAICompatibleFillInMiddleFailover(context, token, filename, pr
 	const fallback = new Promise(async (resolve) => {
 
 		timeoutId = setTimeout(
-			() => {
+			async () => {
 
 				// TODO models must be immutable
 				// models?.shift();
 
-				resolve(
-					openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
-				)
+				const insertText = await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
+
+				if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+					await new Promise(resolve => setTimeout(resolve, 99999));
+				}
+
+				resolve(insertText);
 			},
 			5000
 		)
@@ -561,8 +565,20 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 	try {
 
+		if (models?.length < 1) {
+			return null;
+		}
+
+	} catch (error) {
+
+		console.error(TAG, 'openAICompatibleFillInMiddle', error);
+
+	}
+
+	try {
+
 		// TODO models must be immutable
-		const model = models.shift();
+		const model = models?.shift();
 
 		const body = {
 			model: model,
@@ -587,7 +603,18 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		if (!response.ok && models?.length < 1) {
 			vscode.window.showErrorMessage(`API call failed with status ${response.status}`);
 
-			console.warn(TAG, 'API call failed', { model: model, response: response });
+			console.warn(
+				TAG,
+				'API call failed',
+				{
+					model: model,
+					response: {
+						status: response.status,
+						statusText: response.statusText,
+						body: await response.text(),
+					}
+				}
+			);
 
 			return null;
 		}
@@ -667,7 +694,17 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 		});
 
 		if (!response.ok) {
-			console.debug(TAG, 'API call failed', { response: response });
+			console.debug(
+				TAG,
+				'API call failed',
+				{
+					response: {
+						status: response.status,
+						statusText: response.statusText,
+						body: await response.text(),
+					}
+				}
+			);
 			return null;
 		}
 
