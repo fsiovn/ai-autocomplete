@@ -18,6 +18,7 @@ vsce-publish-patch.sh
 test/**
 logo.svg
 logo.png
+models.json
 icon.svg
 CHANGELOG.md
 demo-prompt.gif
