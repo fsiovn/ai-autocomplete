@@ -34,7 +34,7 @@
   "name": "ai-autocomplete",
   "displayName": "AI-Autocomplete",
   "description": "The lightweight open source AI code autocomplete",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "engines": {
     "vscode": "^1.106.1"
   },
