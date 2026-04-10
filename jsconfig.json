@@ -5,7 +5,8 @@
 		"checkJs": true, /* Typecheck .js files. */
 		"lib": [
 			"ES2022"
-		]
+		],
+		"noImplicitAny": false, /* ts(7006) Parameter 'x' implicitly has an 'any' type */
 	},
 	"exclude": [
 		"node_modules"

@@ -143,15 +143,15 @@
       1. **Web support**:
 
          *GitHub Copilot still doesn't fully support VS Code for the Web (github.dev, vscode.dev).*
-         
+
          *This extension works seamlessly in web environments, making it ideal for contributing to public repositories without a local setup.*
 
       2. **Lightweight**:
-      
-         *This extension is extremely small - around 40 KB, compared to 33 MB for GitHub Copilot + Copilot Chat.*
+
+         *This extension is extremely small - around 50 KB, compared to ~33 MB for GitHub Copilot + Copilot Chat.*
 
       3. **Focused on autocomplete**:
-         
+
          *The extension is dedicated purely to autocomplete.*
          *Users who prefer external chat tools (Cline, KiloCode, ClaudeCode, Codex CLI, etc.) can combine them as they like.*
 
@@ -180,7 +180,7 @@
       3. **Model quality depends on user's API key provider**:
 
          *Performance will vary depending on whether users choose Cerebras or Gemini and what tier they're on.*
-   
+
    > Overall, GitHub Copilot remains a more comprehensive solution, but this extension focuses on being lightweight, open-source, and flexible.
 
 ---

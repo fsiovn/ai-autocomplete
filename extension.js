@@ -217,6 +217,20 @@ async function registerSelectModelCommand(context) {
 
 }
 
+function isShortSuggestion(insertText) {
+
+	try {
+
+		return !insertText || insertText?.trim()?.length < 9;
+
+	} catch (error) {
+
+		console.error(TAG, 'isShortSuggestion', error);
+
+	}
+
+}
+
 async function registerInlineCompletionItemProvider(context) {
 
 	try {
@@ -303,7 +317,7 @@ async function registerInlineCompletionItemProvider(context) {
 
 					const insertText = await fillInMiddle(context, token, filename, document?.languageId, prefix, suffix);
 
-					if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+					if (isShortSuggestion(insertText)) {
 						console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 						return null;
 					}
@@ -311,7 +325,7 @@ async function registerInlineCompletionItemProvider(context) {
 					const inlineCompletionItems = [];
 
 					try {
-						const keywordPrefix = linePrefix.replace(/\./g, '').split(/\s+/).pop();
+						const keywordPrefix = linePrefix.replace(/\./g, '').split(/\s+/).slice(linePrefix.endsWith(' ') ? -2 : -1).join(' ');
 
 						if (keywordPrefix && (linePrefix.length < 9 || keywordPrefix.length > 1) && String(insertText).startsWith(keywordPrefix)) {
 							inlineCompletionItems.push(
@@ -322,7 +336,7 @@ async function registerInlineCompletionItemProvider(context) {
 							);
 						}
 					} catch (error) {
-						console.error(TAG, 'Deduplicate prefix of keyword ', error);
+						console.error(TAG, 'Deduplicate prefix of keyword', error);
 					}
 
 					inlineCompletionItems.push(
@@ -497,53 +511,55 @@ async function cerebrasFillInMiddle(context, token, filename, programmingLanguag
 
 async function openAICompatibleFillInMiddleFailover(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models) {
 
-	// const primaryController = new AbortController();
-	// const fallbackController = new AbortController();
+	try {
 
-	/**
-	 * @type {string | number | NodeJS.Timeout | undefined}
-	 */
-	let timeoutId;
+		return new Promise((resolve) => {
 
-	const fallback = new Promise(async (resolve) => {
+			const timeoutId = setTimeout(
+				async () => {
 
-		timeoutId = setTimeout(
-			async () => {
+					// TODO models must be immutable (?)
+					// models?.shift();
 
-				// TODO models must be immutable
-				// models?.shift();
+					const insertText = await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
 
-				const insertText = await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
+					if (isShortSuggestion(insertText)) {
+						await new Promise(resolve => setTimeout(resolve, 99999));
+					}
 
-				if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
-					await new Promise(resolve => setTimeout(resolve, 99999));
-				}
+					resolve(insertText);
+				},
+				5000
+			)
 
-				resolve(insertText);
-			},
-			5000
-		)
+			openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
+				.then(async (insertText) => {
 
-	});
+					try {
 
-	const primary = openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
-		.then((result) => {
+						clearTimeout(timeoutId);
 
-			try {
+					} catch (error) {
 
-				clearTimeout(timeoutId);
+						console.error(TAG, 'Cannot clear timeout', error);
 
-			} catch (error) {
+					}
 
-				console.error(TAG, 'openAICompatibleFillInMiddleController', error);
+					if (isShortSuggestion(insertText)) {
+						await new Promise(resolve => setTimeout(resolve, 99999));
+					}
 
-			}
+					resolve(insertText);
 
-			return result;
+				});
 
 		});
 
-	return Promise.race([primary, fallback]);
+	} catch (error) {
+
+		console.error(TAG, 'openAICompatibleFillInMiddleFailover', error);
+
+	}
 
 }
 
@@ -551,19 +567,13 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 	try {
 
+		DEBUG_MODE && console.debug(TAG, { models: models });
+
 		// Cancel on change
 		if (token.isCancellationRequested) {
 			DEBUG_MODE && console.debug(TAG, 'Cancel on change - OAI FIM');
 			return null;
 		}
-
-	} catch (error) {
-
-		console.error(TAG, 'openAICompatibleFillInMiddle', error);
-
-	}
-
-	try {
 
 		if (models?.length < 1) {
 			return null;
@@ -577,7 +587,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 	try {
 
-		// TODO models must be immutable
+		// TODO models must be immutable (?)
 		const model = models?.shift();
 
 		const body = {
@@ -620,7 +630,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 		}
 
 		/**
-		 * @type {{ choices?: { message?: { content: string } }[]? }}
+		 * @type {{ choices?: { message?: { content: string } }[]? } | any}
 		 */
 		const data = await response.json();
 		const content = data?.choices?.[0]?.message?.content?.
@@ -639,12 +649,12 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 
 		DEBUG_MODE && console.debug(TAG, { model: model, filename: filename, programmingLanguage: programmingLanguage, prefix: prefix, suffix: suffix, insertText: insertText });
 
-		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+		if (isShortSuggestion(insertText)) {
 			console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 			return null;
 		}
 
-		return String(insertText).includes("\\n") && !String(insertText).includes("\n") ? insertText.replaceAll("\\n", "\n") : insertText;
+		return String(insertText).includes("\\n") && !String(insertText).includes("\n") ? insertText?.replaceAll("\\n", "\n") : insertText;
 
 	} catch (error) {
 
@@ -710,7 +720,9 @@ async function fsiovnFillInMiddle(context, token, filename, programmingLanguage,
 
 		const insertText = await response.text();
 
-		if (!insertText || !insertText?.trim() || insertText?.trim().length < 9) {
+		DEBUG_MODE && console.debug(TAG, { filename: filename, programmingLanguage: programmingLanguage, prefix: prefix, suffix: suffix, insertText: insertText });
+
+		if (isShortSuggestion(insertText)) {
 			console.debug(TAG, 'Skip short suggestion', { insertText: insertText });
 			return null;
 		}
