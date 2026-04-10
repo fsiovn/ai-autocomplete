@@ -52,14 +52,35 @@
       {
         "command": "ai-autocomplete.inputGeminiAPIKey",
         "title": "Input Gemini/Cerebras API key",
-        "category": "fsiovn - AI Autocomplete"
+        "category": "AI Autocomplete (fsiovn)"
       },
       {
         "command": "ai-autocomplete.selectModel",
         "title": "Select model",
-        "category": "fsiovn - AI Autocomplete"
+        "category": "AI Autocomplete (fsiovn)"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-autocomplete-activity-bar",
+          "title": "AI Autocomplete",
+          "icon": "activity-bar.svg",
+          "darkIcon": "activity-bar-dark.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-autocomplete-activity-bar": [
+        {
+          "id": "ai-autocomplete-sidebar",
+          "name": "Settings",
+          "icon": "activity-bar.svg",
+          "darkIcon": "activity-bar-dark.svg",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint .",

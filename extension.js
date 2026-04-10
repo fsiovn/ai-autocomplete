@@ -101,11 +101,25 @@ async function activate(context) {
 		console.log(TAG, 'The open source AI code autocomplete extension for Visual Studio Code');
 
 		try {
+
+			registerSidebar(context);
+
+		} catch (error) {
+
+			console.error(TAG, error);
+
+		}
+
+		try {
+
 			registerInputGeminiAPIKeyCommand(context);
 			getGeminiAPIKey(context);
 			promptInputGeminiAPIKey(context);
+
 		} catch (error) {
+
 			console.error(TAG, error);
+
 		}
 
 		try {
@@ -115,6 +129,7 @@ async function activate(context) {
 		} catch (error) {
 
 			console.error(TAG, error);
+
 		}
 
 		try {
@@ -126,6 +141,230 @@ async function activate(context) {
 			console.error(TAG, error);
 
 		}
+
+	} catch (error) {
+
+		console.error(TAG, error);
+
+	}
+
+}
+
+async function registerSidebar(context) {
+
+	function html(title, style, body) {
+		return `
+			<!DOCTYPE html>
+			<html lang="en">
+				<head>
+					<meta charset="UTF-8">
+					<!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none';"> -->
+					<meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline';">
+					<meta name="viewport" content="width=device-width, initial-scale=1.0">
+					<title>${title}</title>
+
+					<style>
+
+						* {
+							box-sizing: border-box;
+							scroll-behavior: smooth;
+						}
+
+						button {
+							font-size: var(--vscode-font-size);
+							font-family: var(--vscode-font-family);
+							font-weight: var(--vscode-font-weight);
+
+							color: var(--vscode-button-foreground);
+							background: var(--vscode-button-background);
+							border: 1px solid var(--vscode-button-border, transparent);
+
+							padding: 4px 8px;
+							border-radius: 4px;
+
+							line-height: 1.25;
+
+							text-align: center;
+						}
+
+						.w-100 {
+							width: 100%;
+						}
+
+						.text-center {
+							text-align: center;
+						}
+
+						${style}
+
+					</style>
+				</head>
+				<body>
+					${body}
+				</body>
+			</html>
+		`
+	}
+
+	try {
+
+		const sidebarProvider = {
+
+			async resolveWebviewView(webviewView) {
+
+				webviewView.webview.options = {
+					enableScripts: true,
+				}
+
+				const sidebarHTML = `
+					<h1>AI Autocomplete</h1>
+
+					<button id='update' class='w-100'>Button</button>
+
+					<script type="module">
+						(function() {
+							const vscode = acquireVsCodeApi();
+
+							document.getElementById('update').addEventListener('click', () => {
+								vscode.postMessage({
+									type: 'requestUpdate',
+									payload: {
+										text: 'Data from Webview'
+									}
+								});
+							});
+						}());
+					</script>
+
+					<div id="content"></div>
+					<script>
+						window.addEventListener('message', event => {
+							const message = event.data;
+
+							if (message.type === 'updateData') {
+								document.getElementById('content').innerText =
+									message.payload.text;
+							}
+						});
+					</script>
+				`
+
+				webviewView.webview.html = html('AI Autocomplete', '', sidebarHTML);
+
+				/**
+				 * @type {vscode.WebviewPanel | undefined}
+				 */
+				let panel = undefined;
+
+				const disposable = webviewView.webview.onDidReceiveMessage(message => {
+
+					if (message.type === 'requestUpdate') {
+
+						webviewView.webview.postMessage({
+							type: 'updateData',
+							payload: {
+								text: message.payload.text
+							}
+						});
+
+						const viewColumn = vscode.ViewColumn.One;
+
+						// Reuse panel, prevent duplicate
+						if (panel) {
+							panel.reveal(viewColumn);
+							return;
+						}
+
+						panel = vscode.window.createWebviewPanel(
+							'ai-autoComplete.manage-providers',
+							'Manage Providers',
+							viewColumn,
+							{
+								enableScripts: true,
+							}
+						);
+
+						const iconPath = (filename) => vscode.Uri.joinPath(
+							context.extensionUri,
+							filename
+						);
+
+						panel.iconPath = {
+							light: iconPath('activity-bar.svg'),
+							dark: iconPath('activity-bar-dark.svg')
+						}
+
+						const panelContent = `
+							<h1>AI Autocomplete</h1>
+
+							<button id='update-2'>Button</button>
+							<script type="module">
+								(function() {
+									const vscode = acquireVsCodeApi();
+
+									document.getElementById('update-2').addEventListener('click', () => {
+										vscode.postMessage({
+											type: 'requestUpdate-2',
+											payload: {
+												text: 'Data from Webview'
+											}
+										});
+									});
+								}());
+							</script>
+
+							<div id="content-2"></div>
+							<script>
+								window.addEventListener('message', event => {
+									const message = event.data;
+
+									if (message.type === 'updateData-2') {
+										document.getElementById('content-2').innerText =
+											message.payload.text;
+									}
+								});
+							</script>
+						`
+
+						panel.webview.html = html('AI Autocomplete', '', panelContent);
+
+						const disposable = panel.webview.onDidReceiveMessage(message => {
+
+							if (message.type === 'requestUpdate-2') {
+
+								panel?.webview.postMessage({
+									type: 'updateData-2',
+									payload: {
+										text: 'Hello new data'
+									}
+								});
+
+							}
+
+						});
+
+						panel.onDidDispose(() => {
+							disposable?.dispose();
+
+							panel = undefined;
+						});
+
+					}
+
+				});
+
+				webviewView.onDidDispose(() => disposable?.dispose());
+
+			}
+
+		}
+
+		const sidebarDisposable = vscode.window.registerWebviewViewProvider(
+			'ai-autocomplete-sidebar',
+			sidebarProvider
+		);
+
+		context.subscriptions.push(sidebarDisposable);
 
 	} catch (error) {
 
