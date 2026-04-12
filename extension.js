@@ -267,9 +267,7 @@ async function registerInlineCompletionItemProvider(context) {
 					const filename = document.fileName;
 
 					if (FILENAME_SENSITIVE_KEYWORDS.some(filenameSensitiveKeyword => filename.toLowerCase().includes(filenameSensitiveKeyword))) {
-
 						console.debug(TAG, 'Skip sensitive file', filename);
-
 						return null;
 					}
 
@@ -452,6 +450,8 @@ async function fillInMiddle(context, token, filename, programmingLanguage, prefi
 		fimCounter++;
 
 		if (fimCounter % 999 === 0) {
+			fimCounter = 0;
+
 			await promptInputGeminiAPIKey(context);
 
 			try {
@@ -515,21 +515,34 @@ async function openAICompatibleFillInMiddleFailover(context, token, filename, pr
 
 		return new Promise((resolve) => {
 
+			const resolveWithDelay = async (insertText) => {
+
+				if (insertText !== '' && isShortSuggestion(insertText)) {
+					// Delay to skip
+					await new Promise(resolve => setTimeout(resolve, 99999));
+				}
+
+				resolve(insertText);
+
+			};
+
 			const timeoutId = setTimeout(
 				async () => {
 
 					// TODO models must be immutable (?)
 					// models?.shift();
 
-					const insertText = await openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models);
-
-					if (isShortSuggestion(insertText)) {
-						await new Promise(resolve => setTimeout(resolve, 99999));
+					// Cancel on change
+					if (token.isCancellationRequested) {
+						console.debug(TAG, 'Cancel on change');
+						return null;
 					}
 
-					resolve(insertText);
+					openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
+						.then(async (insertText) => resolveWithDelay(insertText));
+
 				},
-				5000
+				3000 + Math.floor((String(prefix).length + String(suffix).length) / 9)
 			)
 
 			openAICompatibleFillInMiddle(context, token, filename, programmingLanguage, prefix, suffix, baseURL, apiKey, models)
@@ -545,11 +558,7 @@ async function openAICompatibleFillInMiddleFailover(context, token, filename, pr
 
 					}
 
-					if (isShortSuggestion(insertText)) {
-						await new Promise(resolve => setTimeout(resolve, 99999));
-					}
-
-					resolve(insertText);
+					resolveWithDelay(insertText);
 
 				});
 
@@ -638,7 +647,7 @@ async function openAICompatibleFillInMiddle(context, token, filename, programmin
 			replace(/^.*?<\/think>\n\n<fim_middle>/s, '<fim_middle>');
 
 		if (content === '<fim_middle></fim_middle>') {
-			return null;
+			return '';
 		}
 
 		const insertText = content?.trim()?.match(/^<fim_middle>([\s\S]*?)<\/fim_middle>$/s)?.[1] || null;
